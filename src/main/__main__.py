@@ -20,7 +20,7 @@ Session(main_app)
 # Đăng ký các blueprint cho từng ứng dụng
 main_app.register_blueprint(chat_app, url_prefix="/chat")
 main_app.register_blueprint(auth_app, url_prefix="/auth")
-main_app.register_blueprint(AI_Image_app, url_prefix="/AIImage")
+# main_app.register_blueprint(AI_Image_app, url_prefix="/AIImage")
 
 
 @main_app.route("/")

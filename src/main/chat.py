@@ -14,7 +14,7 @@ load_dotenv()
 genai.configure(api_key=os.getenv("GERMINI_API_KEY"))
 
 # Khởi tạo mô hình
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-1.5-pro")
 conversation_context = []
 current_group_id = None  # Biến lưu nhóm trò chuyện hiện tại của người dùng
 

@@ -23,7 +23,7 @@
     <script src="{{ url_for('static', filename='js/common.js') }}"></script>
     <script src="{{ url_for('static', filename='js/notes.js') }}"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/mouseMove.js') }}"></script>
+    
 </head>
 <!-- <body onmousemove="mouseMoved(event)"> -->
 
@@ -67,7 +67,7 @@
     </div>
 
     <div class="appFrame" id="theApp">
-        <div class="bar">
+        <div class="bar" id="appBar">
             <div class="control">
                 <div class="red" style="background-color: red;" onclick="closeApp()"></div>
                 <div class="yellow" style="background-color: yellow;" onclick="closeApp()"></div>
@@ -77,8 +77,7 @@
         </div>
         <iframe src="/src/main/templates/app/settings.html" frameborder="0" id="appWindowIframe"></iframe>
     </div>
-
-
+    <script src="{{ url_for('static', filename='js/mouseMove.js') }}"></script>
 </body>
 
 </html>

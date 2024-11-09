@@ -506,21 +506,25 @@ img {
 /* Container để link nằm ngang nhau */
 .link-container {
     display: flex;
-    gap: 8px;
+    gap: 16px;
+    /* Tăng khoảng cách giữa các box link */
     flex-wrap: wrap;
     margin-top: 8px;
+    margin: 4px;
 }
 
 /* Style cho từng box link */
 .link-box {
     background-color: #181717;
     border-radius: 5px;
-    padding: 5px 10px;
+    padding: 8px 12px;
+    /* Tăng padding để nội dung có thêm không gian */
     text-align: center;
     font-size: 0.9em;
     display: inline-block;
     transition: all 0.3s ease;
-    /* Thêm hiệu ứng chuyển động */
+    margin: 8px 4px;
+    /* Thêm margin để mỗi box cách xa nhau hơn */
 }
 
 /* Style cho link */

@@ -318,9 +318,7 @@ $(document).ready(function () {
                                     let aiResponse = data.response || '';
                                     if (links && links.length > 0) {
                                         // Thêm các liên kết vào aiResponse nếu có
-                                        aiResponse += "<br><div class='links'>" + links.map(link =>
-                                            `<div class="link-box"><a href="${link}" target="_blank">${getDomainName(link)}...</a></div>`
-                                        ).join('') + "</div>";
+                                        aiResponse += '\n' + links + '\n';
                                     }
 
                                     // Lưu phản hồi AI vào history
@@ -406,8 +404,6 @@ $(document).ready(function () {
         $('#response').scrollTop($('#response')[0].scrollHeight);
     }
 
-    // Function to save conversation history to DB
-    // Function to save conversation history to DB
     function saveConversationHistoryToDB(conversationHistory) {
         const userPrompt = conversationHistory.filter(item => item.sender === 'user').map(item => item.message).join(" ");
         const aiResponse = conversationHistory.filter(item => item.sender === 'ai').map(item => item.message).join(" ");
@@ -589,20 +585,16 @@ $(document).ready(function () {
 
 
     function formatAndEscapeMessage4User(message) {
-        // Escape HTML special characters
-        const escapedMessage = message.replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#39;");
-
-        // Apply formatting
-        return escapedMessage
+        // Áp dụng định dạng (bold, italic, link)
+        const formattedMessage = message
             .replace(/\*\*(.*?)\*\*/g, '<b style="color: #ce2479;">$1</b>') // Bold
             .replace(/__(.*?)__/g, '<i>$1</i>') // Italic
-            .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>') // Link
+            .replace(/\[(.*?)\]\((https?:\/\/[^\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>') // Link (chỉ chấp nhận URL bắt đầu với http/https)
             .replace(/\n/g, '<br>'); // Giữ lại xuống dòng
+
+        return formattedMessage;
     }
+
 
 
     function loadChatHistory() {
@@ -613,7 +605,6 @@ $(document).ready(function () {
                 console.log(data); // Kiểm tra dữ liệu phản hồi
                 if (data.conversations && Array.isArray(data.conversations)) {
                     data.conversations.forEach(group => {
-                        // Duyệt qua tất cả các tin nhắn trong lịch sử của nhóm
                         group.history.forEach(item => {
                             // Hiển thị tin nhắn của người dùng
                             const userMessage = formatAndEscapeMessage4User(item.input_text);
@@ -627,17 +618,15 @@ $(document).ready(function () {
                             }
 
                             // Lưu trữ phản hồi AI
-                            const aiResponse = item.ai_response;
+                            let aiResponse = item.ai_response;
                             const aiMessageBubble = appendMessage("Đang load tin nhắn...", "ai");
 
-                            // Lấy văn bản và khối mã từ phản hồi
+                            // Tách text và code blocks từ aiResponse
                             const { text, codeBlocks } = extractCodeAndText(aiResponse);
-
-                            // Format văn bản
                             let formattedText = formatAndEscapeMessage(text);
                             let finalMessage = formattedText + "<br>";
 
-                            // Xử lý code blocks
+                            // Xử lý các code blocks nếu có
                             const seenLanguages = new Set();
                             codeBlocks.forEach(({ language, codeBlock }) => {
                                 const languageTitle = `<p><b>${language.charAt(0).toUpperCase() + language.slice(1)}:</b></p>`;
@@ -651,10 +640,20 @@ $(document).ready(function () {
                                 finalMessage += createCodeBlock(codeBlock, language);
                             });
 
-                            // Nếu có chứa liên kết, giữ nguyên HTML
-                            if (aiResponse.includes('<div class="links">')) {
-                                finalMessage += aiResponse.match(/<div class="links">[\s\S]*<\/div>/)[0];
+                            // Tìm và thêm các liên kết từ aiResponse
+                            const linkRegex = /(https?:\/\/[^\s,]+)/g;
+                            let links = aiResponse.match(linkRegex); // Khai báo đúng mảng links
+
+                            // Add links if any
+                            if (links && links.length > 0) {
+                                links.forEach(link => {
+                                    const linkShort = getDomainName(link) + "...";
+                                    finalMessage += `<div class="link-box"><a href="${link}" target="_blank">${linkShort}</a></div>`;
+                                });
+                                finalMessage += "</div>"; // Thêm thẻ đóng div.links nếu có liên kết
+                                finalMessage = finalMessage.replace(links, '')
                             }
+
 
                             // Thêm nội dung vào DOM với innerHTML để xử lý HTML
                             aiMessageBubble.innerHTML = finalMessage;
