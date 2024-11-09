@@ -1,34 +1,4 @@
 @echo off
-
-REM Kiểm tra xem Chocolatey đã được cài đặt chưa
-where choco > nul 2>&1
-IF ERRORLEVEL 1 (
-    echo Chocolatey chưa được cài đặt. Đang cài đặt Chocolatey...
-    REM Cài đặt Chocolatey
-    REM Thực hiện cài đặt Chocolatey từ PowerShell
-    powershell -Command "Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
-    IF ERRORLEVEL 1 (
-        echo Lỗi khi cài đặt Chocolatey. Vui lòng kiểm tra và cài đặt thủ công.
-        exit /b 1
-    )
-) ELSE (
-    echo Chocolatey đã được cài đặt.
-)
-
-REM Kiểm tra xem Python đã được cài đặt chưa
-where python > nul 2>&1
-IF ERRORLEVEL 1 (
-    echo Python chưa được cài đặt. Đang cài đặt Python...
-    REM Cài đặt Python 3.11 bằng Chocolatey
-    choco install python --version=3.11 -y
-    IF ERRORLEVEL 1 (
-        echo Lỗi khi cài đặt Python. Vui lòng kiểm tra và cài đặt thủ công.
-        exit /b 1
-    )
-) ELSE (
-    echo Python đã được cài đặt.
-)
-
 REM Kiểm tra xem môi trường ảo đã tồn tại chưa
 IF EXIST .venv (
     echo Đang xóa môi trường virtual environment hiện tại...
