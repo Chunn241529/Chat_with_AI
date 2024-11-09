@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat với tui</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script_chat.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_chat.css') }}">
+</head>
+
+<body>
+    <div class="--dark-theme" id="chat">
+        <!-- <div id="menubar">
+            <div id="team-picker">
+                <ul class="teams">
+                    <li class="team" id="new-chat">Chat mới</li>
+                    <li class="team" id="new-chat-withdataset">Vẽ với AI</li>
+                    <li class="team"></li>
+                    <li>
+                        <a href="/auth/logout" class="logout-icon" title="Đăng xuất"
+                            style="color: #ffffff; font-family: sans-serif;">
+                            <i class="fas fa-sign-out-alt"> Đăng xuất</i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div> -->
+
+        <div class="chat_con" id="chat_container">
+            <div class="chat__conversation-area">
+                <div class="chat__conversation-board" id="response">
+                    <!-- Tin nhắn sẽ được thêm vào đây -->
+                </div>
+
+                <div class="chat__conversation-panel" id="panel_container">
+                    <!-- <div id="image_preview_container">
+                        
+                    </div> -->
+                    <div class="chat__conversation-panel__container">
+                        <input type="file" id="file_input" style="display:none;" accept="image/*" />
+                        <button class="chat__conversation-panel__button panel-item btn-icon add-file-button"
+                            id="add_file_button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                        <textarea class="chat__conversation-panel__input" id="user_input"
+                            placeholder="Nhập tin nhắn..."></textarea>
+                        <button class="chat__conversation-panel__button panel-item send-message-button" id="send">
+                            <img src="../static/img/send.png" alt="Send" id="send-icon" />
+                        </button>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-full" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Vẽ với tui</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <iframe id="modalIframe" src="" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal_image" id="modal_img_preview" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- Nút đóng sẽ nằm chồng lên ảnh -->
+                    <button type="button" class="close" aria-label="Close" id="close_btn"
+                        style="position: absolute; top: 5px; right: 10px; z-index: 99999; outline: none;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <img id="img_preview" src="" />
+                </div>
+            </div>
+        </div>
+
+        <script src="{{ url_for('static', filename='componant_modal.js') }}"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    </div>
+</body>
+
+</html>

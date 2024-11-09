@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_login.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+</head>
+
+<body>
+    <div class="container">
+        <pre id="output"></pre>
+        <div class="input-area">
+            <span id="prompt"></span>
+            <input type="text" id="input" autofocus />
+
+        </div>
+        <pre id="output1"></pre>
+        <div class="input-area">
+            <span id="prompt1"></span>
+            <input type="password" id="input1" autofocus />
+        </div>
+        <pre id="output2"></pre>
+    </div>
+    <script src="{{ url_for('static', filename='js/script_login.js') }}"></script>
+</body>
+
+</html>

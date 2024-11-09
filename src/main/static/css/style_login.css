@@ -1,0 +1,106 @@
+body {
+    background-image: url(../images/11.png);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 16px;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    height: calc(100vh - 40px);
+    overflow: hidden;
+    /* Giữ cho không bị tràn */
+}
+
+#output {
+    white-space: pre-wrap;
+    overflow-y: auto;
+    margin-bottom: 0;
+    /* Không có khoảng cách dưới */
+}
+
+.input-area {
+    display: flex;
+    align-items: center;
+    /* Giữ cho prompt và input cùng hàng */
+}
+
+#prompt {
+    margin-right: 5px;
+    /* Một chút khoảng cách giữa prompt và input */
+}
+
+#input,
+#input1 {
+    background-color: transparent;
+    /* Không có màu nền */
+    color: white;
+    /* Màu chữ trắng */
+    border: none;
+    /* Không có viền */
+    outline: none;
+    /* Không có đường viền khi focus */
+    flex: 1;
+    /* Để chiếm toàn bộ không gian */
+    font-family: 'Courier New', Courier, monospace;
+    padding: 5px;
+    /* Một chút khoảng cách bên trong */
+}
+
+#prompt1 {
+    margin-right: 5px;
+    /* Một chút khoảng cách giữa prompt và input */
+}
+
+
+/* Responsive cho mobile */
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+        /* Giảm khoảng cách cho mobile */
+    }
+
+    #input,
+    #input1 {
+        font-size: 14px;
+        /* Giảm kích thước chữ cho mobile */
+        padding: 10px;
+        /* Tăng khoảng cách bên trong cho dễ sử dụng */
+    }
+}
+
+/* Responsive cho tablet */
+@media (min-width: 481px) and (max-width: 768px) {
+    .container {
+        padding: 15px;
+        /* Giảm khoảng cách cho tablet */
+    }
+
+    #input,
+    #input1 {
+        font-size: 15px;
+        /* Giảm kích thước chữ cho tablet */
+        padding: 8px;
+        /* Tăng khoảng cách bên trong cho dễ sử dụng */
+    }
+}
+
+/* Responsive cho iPad */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        padding: 20px;
+        /* Giữ khoảng cách cho iPad */
+    }
+
+    #input,
+    #input1 {
+        font-size: 16px;
+        /* Giữ kích thước chữ cho iPad */
+        padding: 5px;
+        /* Giữ khoảng cách bên trong */
+    }
+}
