@@ -245,3 +245,9 @@ body {
     transform: translateY(0);
   }
 }
+
+/* CSS cho hiệu ứng chuyển trang */
+.fade-out {
+  opacity: 0;
+  transition: opacity 1s ease;
+}

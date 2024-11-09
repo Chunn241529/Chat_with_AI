@@ -2,7 +2,6 @@ from flask import Flask, redirect, url_for
 from flask_session import Session
 from chat import app as chat_app
 from authentication import app as auth_app
-from imgGenerate.__txt2img__ import app as AI_Image_app  # Sửa lại đường dẫn cho đúng
 import secrets
 
 # Tạo một ứng dụng Flask chính

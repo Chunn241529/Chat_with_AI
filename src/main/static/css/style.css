@@ -1,11 +1,11 @@
 @font-face {
     font-family: google;
-    src: url("fonts/GoogleSans-Regular.ttf");
+    src: url("../fonts/GoogleSans-Regular.ttf");
 }
 
 @font-face {
     font-family: googleL;
-    src: url("fonts/ProductSans-Light.ttf");
+    src: url("../fonts/ProductSans-Light.ttf");
 }
 
 * {

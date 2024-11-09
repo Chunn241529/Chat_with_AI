@@ -1,8 +1,14 @@
 $(document).ready(function () {
     // Thêm hiệu ứng nhập và xóa cho placeholder
-    const placeholderText = "Nhập tin nhắn...";
+
+    let isSending = false;  // Biến trạng thái đang gửi
+    let currentFetchController = null;  // Bộ điều khiển để hủy yêu cầu fetch hiện tại
+
+    const placeholderText = "Nhập tin nhắn";
     let placeholderIndex = 0;
     let typing = true;
+
+  
 
     function animatePlaceholder() {
         const textarea = $('#user_input');
@@ -43,7 +49,7 @@ $(document).ready(function () {
             // Reset lại chiều cao về mặc định nếu không tràn
             this.style.height = '47px';
             let panelContainer = document.getElementById('panel_container');
-            panelContainer.style.height = '60px';
+            panelContainer.style.height = '70px';
         }
     });
 
@@ -53,7 +59,7 @@ $(document).ready(function () {
     $('#user_input').focus();
 
     $('#user_input').css('height', '47px');
-    $('#panel_container').css('height', '60px');
+    $('#panel_container').css('height', '70px');
 
     $('#user_input').keydown(function (event) {
         if (event.shiftKey && event.which === 13) {
@@ -145,7 +151,7 @@ $(document).ready(function () {
                 $('#file_input').val(currentInput); // Reset file input
                 $('#modal_img_preview').fadeOut(); // Ẩn modal hình ảnh
                 $('#user_input').css('height', '47px');
-                $('#panel_container').css('height', '60px');
+                $('#panel_container').css('height', '70px');
             } else {
                 clearInterval(interval);
             }
@@ -190,6 +196,18 @@ $(document).ready(function () {
     }
 
     $('#send').click(function () {
+        if (isSending) {
+            if (currentFetchController) {
+                currentFetchController.abort();  // Hủy yêu cầu fetch hiện tại
+            }
+            isSending = false;  // Cập nhật trạng thái không còn đang gửi
+            document.getElementById("send").classList.remove("sending");  // Cập nhật nút
+            document.getElementById("send-icon").src = "../static/img/send.png";  // Khôi phục icon ban đầu
+            return;
+        }
+
+        // Đặt trạng thái gửi và thay đổi giao diện
+        isSending = true;
         document.getElementById("send").classList.add("sending");
         document.getElementById("send-icon").src = "../static/img/square.png";
 
@@ -213,6 +231,9 @@ $(document).ready(function () {
                 },
                 error: function (error) {
                     console.error('Có lỗi xảy ra:', error);
+                },
+                complete: function () {
+                    isSending = false;  // Cập nhật trạng thái sau khi hoàn tất
                 }
             });
         }
@@ -234,6 +255,9 @@ $(document).ready(function () {
                     },
                     error: function (error) {
                         console.error('Có lỗi xảy ra:', error);
+                    },
+                    complete: function () {
+                        isSending = false;  // Cập nhật trạng thái sau khi hoàn tất
                     }
                 });
             } else {
@@ -254,27 +278,36 @@ $(document).ready(function () {
                 if (imageFile) {
                     const reader = new FileReader();
                     reader.onload = function (event) {
-                        const imgSrc = event.target.result; // Lấy dữ liệu base64 của ảnh
-                        appendMessage(imgSrc, "user");  // Gọi appendMessage với hình ảnh base64
+                        const imgSrc = event.target.result;
+                        appendMessage(imgSrc, "user");
 
                         const formData = new FormData();
-                        formData.append('image_file', imageFile);  // Thêm file ảnh vào formData
-                        formData.append('prompt', userInput);  // Thêm prompt vào formData
+                        formData.append('image_file', imageFile);
+                        formData.append('prompt', userInput);
 
+                        currentFetchController = new AbortController();  // Tạo AbortController mới cho mỗi yêu cầu
                         fetch('/chat/send-image', {
                             method: 'POST',
                             body: formData,
+                            signal: currentFetchController.signal  // Thêm signal vào fetch để hỗ trợ hủy
                         })
                             .then(response => response.json())
                             .then(data => {
                                 handleResponse(data);
                             })
                             .catch(error => {
-                                console.error('Error sending image and prompt:', error);
-                                alert('Error sending image and prompt');
+                                if (error.name === 'AbortError') {
+                                    console.log('Yêu cầu đã bị hủy');
+                                } else {
+                                    console.error('Error sending image and prompt:', error);
+                                    alert('Error sending image and prompt');
+                                }
+                            })
+                            .finally(() => {
+                                isSending = false;
                             });
                     };
-                    reader.readAsDataURL(imageFile);  // Chuyển đổi file thành base64
+                    reader.readAsDataURL(imageFile);
                 } else {
                     // Kiểm tra nếu userInput chứa từ khóa
                     if (containsKeyword(userInput)) {
@@ -301,12 +334,13 @@ $(document).ready(function () {
                                 links = response.organic.map(item => item.link);
                             }
 
-                            // Sau khi tìm kiếm xong, gửi yêu cầu tới server để nhận phản hồi AI
+                            currentFetchController = new AbortController();
                             $.ajax({
                                 type: "POST",
                                 url: "/chat/send",
                                 contentType: "application/json",
                                 data: JSON.stringify({ user_input: userInput }),
+                                signal: currentFetchController.signal,
                                 success: function (data) {
                                     // Xử lý phản hồi AI với các liên kết
                                     handleResponse(data, links); // Gọi handleResponse với các liên kết tìm được
@@ -332,6 +366,9 @@ $(document).ready(function () {
                                 },
                                 error: function (xhr) {
                                     handleResponse({ response: xhr.responseJSON.error + '' }, []);
+                                },
+                                complete: function () {
+                                    isSending = false;
                                 }
                             });
                         }).fail(function () {
@@ -339,12 +376,13 @@ $(document).ready(function () {
                         });
                     }
                     else {
-                        // Nếu không có từ khóa, chỉ gửi yêu cầu đến AI mà không tìm kiếm
+                        currentFetchController = new AbortController();
                         $.ajax({
                             type: "POST",
                             url: "/chat/send",
                             contentType: "application/json",
                             data: JSON.stringify({ user_input: userInput }),
+                            signal: currentFetchController.signal,
                             success: function (data) {
                                 handleResponse(data);
 
@@ -360,6 +398,9 @@ $(document).ready(function () {
                             },
                             error: function (xhr) {
                                 handleResponse({ response: xhr.responseJSON.error + '' });
+                            },
+                            complete: function () {
+                                isSending = false;
                             }
                         });
                     }

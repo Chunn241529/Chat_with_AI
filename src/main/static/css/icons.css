@@ -1,18 +1,17 @@
 #icon1 {
-    background-image: url('../icon/chat_with_ai.png');
+    background-image: url('../icon/chat.png');
 }
 
 #icon2 {
-    background-image: url('../icon/Ap_image_gen.png');
+    background-image: url('../icon/stable.png');
 }
 
-/* Calendar icon with text */
 #icon3 {
-    background-image: url('../icon/notes.png');
+    background-image: url('../icon/notes2.png');
 }
 
 #icon4 {
-    background-image: url('../icon/notes2.png');
+    background-image: url('../icon/logout_16697253.png');
 }
 
 #icon5 {
@@ -52,7 +51,7 @@
 }
 
 #icon14 {
-    background-image: url('../icon/system.png');
+    background-image: url('../icon/280259_fullscreen_full\ screen_expand_maximize_icon.png');
 }
 
 /* Fullscreen icon */

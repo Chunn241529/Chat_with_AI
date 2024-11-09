@@ -1,77 +1,92 @@
 import os
 import subprocess
 import time
-from flask import Flask, json, redirect, url_for
+import json  # Standard Python json module
+from flask import Flask, redirect, render_template, url_for
 from flask_session import Session
 from chat import app as chat_app
-from authentication import app as auth_app  # Đảm bảo import đúng blueprint auth
+from authentication import app as auth_app  # Ensure correct blueprint import
 
-# Tạo một ứng dụng Flask chính
+# Create main Flask app
 main_app = Flask(__name__)
 
 import secrets
 
-# Tạo một khóa bí mật 32 ký tự (16 byte)
+# Generate a secret key
 secret_key = secrets.token_hex(16)
 print(secret_key)
 
-# Cấu hình Flask-Session
+# Flask-Session configuration
 main_app.config["SESSION_TYPE"] = "filesystem"
-main_app.secret_key = secret_key  # Thay thế bằng khóa bí mật thực tế của bạn
+main_app.secret_key = secret_key  # Replace with your actual secret key
 Session(main_app)
 
-# Đăng ký các blueprint cho từng ứng dụng
+# Register blueprints
 main_app.register_blueprint(chat_app, url_prefix="/chat")
 main_app.register_blueprint(auth_app, url_prefix="/auth")
 
-
-# Route chính để chuyển hướng đến /auth/chat
-@main_app.route("/")
-def index():
-    return redirect(
-        url_for("auth.login")
-    )  # Giả sử 'auth.login' là route của trang đăng nhập
-
-
-# Biến toàn cục để lưu ngrok_process
 ngrok_process = None
+ngrok_url = None
 
 
 def start_ngrok():
-    global ngrok_process
+    global ngrok_process, ngrok_url
     if ngrok_process is not None:
         print("Ngrok is already running.")
         return ngrok_process
 
-    # Thay đổi đường dẫn đến ngrok nếu cần
-    ngrok_path = os.path.join(
-        os.path.dirname(__file__), "ngrok", "ngrok.exe"
-    )  # Sử dụng os.path.join để xây dựng đường dẫn
-    port = 5000  # Cổng mà Flask đang chạy
-    # Khởi động ngrok
-    ngrok_process = subprocess.Popen([ngrok_path, "http", str(port)])
-    time.sleep(2)  # Chờ ngrok khởi động
+    # Path to ngrok executable
+    ngrok_path = os.path.join(os.path.dirname(__file__), "ngrok", "ngrok.exe")
+    port = 5000  # Flask port
 
-    # Lấy URL ngrok
+    # Command to start ngrok tunnel with the --label parameter
+    ngrok_command = [
+        ngrok_path,
+        "tunnel",
+        "--label",
+        "edge=edghts_2ocqbHTTzjZhr4cPb5fxS9DpRyr",
+        f"http://localhost:{port}",
+    ]
+
+    # Start ngrok using subprocess
+    ngrok_process = subprocess.Popen(ngrok_command)
+    time.sleep(5)  # Wait for ngrok to initialize
+
+    # Retrieve ngrok URL
     url_process = subprocess.Popen(
         ["curl", "-s", "http://localhost:4040/api/tunnels"], stdout=subprocess.PIPE
     )
     output, _ = url_process.communicate()
 
-    # Phân tích kết quả JSON để lấy URL public
-    tunnels = json.loads(output)
-    public_url = tunnels["tunnels"][0]["public_url"]
+    try:
+        tunnels = json.loads(output)
+        if "tunnels" in tunnels and len(tunnels["tunnels"]) > 0:
+            public_url = tunnels["tunnels"][0]["public_url"]
+            print("Ngrok URL:", public_url)
+            ngrok_url = public_url  # Store the ngrok URL
+            return ngrok_process
+        else:
+            print("No tunnels found. Check ngrok status.")
+            return None
+    except json.JSONDecodeError:
+        print("Error parsing JSON response from Ngrok.")
+        return None
 
-    print("Ngrok URL:", public_url)
-    return ngrok_process
+
+# Start ngrok and store the URL
+ngrok_process = start_ngrok()
+
+
+@main_app.route("/")
+def index():
+    if ngrok_url is None:
+        # If ngrok URL is not available, try starting ngrok again
+        start_ngrok()
+
+    return render_template(
+        "login.html", url_ngrok=ngrok_url
+    )  # Pass ngrok URL to the template
 
 
 if __name__ == "__main__":
-    ngrok_process = start_ngrok()  # Khởi động ngrok và lấy URL
-    try:
-        main_app.run(debug=True)
-    finally:
-        # Đảm bảo ngrok dừng khi ứng dụng kết thúc
-        if ngrok_process:
-            ngrok_process.terminate()
-            print("Ngrok has been terminated.")
+    main_app.run(debug=True)

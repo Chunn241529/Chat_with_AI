@@ -7,7 +7,6 @@ from flask import Blueprint, render_template, request, jsonify, session, url_for
 import google.generativeai as genai
 from werkzeug.utils import secure_filename
 
-from imgGenerate.__txt2img__ import img_create
 
 # Tải biến môi trường từ file .env
 load_dotenv()

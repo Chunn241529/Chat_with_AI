@@ -47,7 +47,7 @@ function closeApp() {
     app.style.opacity = "0";
     setTimeout(() => {
         app.style.display = "none";
-        win.src = "blank.html";
+        // win.src = "./blank.html";
     }, 100);
     isAppFullScreen = -1;
     app.style.borderRadius = "10px";

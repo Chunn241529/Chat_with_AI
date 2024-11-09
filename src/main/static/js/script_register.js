@@ -1,6 +1,6 @@
 var counter = 1;
 $(document).ready(function () {
-
+    const mainContainer = document.querySelector('body');
     var erroEle = $('.error-message'),
         focusInput = $('.questions').find('.active');
 
@@ -147,6 +147,7 @@ $(document).ready(function () {
 
                 // Thêm redirect qua trang đăng nhập sau 2 giây
                 setTimeout(function () {
+                    mainContainer.classList.add('fade-out');
                     window.location.href = "/auth/login";
                 }, 2000); // Thời gian chờ 2 giây
             },
