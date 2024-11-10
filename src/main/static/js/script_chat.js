@@ -8,7 +8,7 @@ $(document).ready(function () {
     let placeholderIndex = 0;
     let typing = true;
 
-  
+
 
     function animatePlaceholder() {
         const textarea = $('#user_input');
@@ -161,6 +161,38 @@ $(document).ready(function () {
         $('#user_input').focus();
     }
 
+    const keyword_cams = [
+        // Tiếng Việt
+        // Tiếng Việt
+        "đéo", "địt", "má", "mẹ", "cặc", "lồn", "đồ chó", "đồ khốn", "đồ chết tiệt", "đồ mất dạy",
+        "bố láo", "vô học", "cút", "điên khùng", "ngu si", "đần độn", "con đĩ", "thằng hâm", "mày tao",
+        "ngu ngốc", "vãi", "thằng ngu", "thằng khốn", "con mụ", "đồ rẻ rách", "bẩn thỉu", "chết mẹ mày đi",
+        "cái thứ", "đm", "vãi cả", "cút mẹ", "vãi nồi", "vãi đạn", "đĩ điếm", "đồ súc sinh", "đồ khỉ gió",
+        "đồ con hoang", "bà nội mày", "bà ngoại mày", "thằng chó", "chết tiệt", "khốn nạn", "đụ",
+        "đụ má", "đồ đểu", "thúi tha", "chết cha mày", "mẹ kiếp", "mẹ mày", "chết bầm", "khốn kiếp",
+        "thằng quỷ", "con quỷ",
+
+        // Tiếng Anh
+        "fuck", "shit", "bitch", "asshole", "bastard", "motherfucker", "cunt", "dumbass", "idiot",
+        "moron", "jerk", "retard", "piss off", "bullshit", "damn", "screw you", "dickhead", "prick",
+        "scumbag", "son of a bitch", "loser", "suck", "crap", "arsehole", "goddamn", "douchebag",
+        "whore", "slut", "dick", "fucker", "arse", "freak", "jerk off", "hell no", "holy shit",
+        "freaking", "screw it", "bloody hell", "pain in the ass", "screw that", "for Christ's sake",
+        "for God's sake", "what the hell", "go to hell", "shut the fuck up", "dammit"
+    ];
+
+    function check_tucam(user_input) {
+        // Đảm bảo user_input là chuỗi và chuyển thành chữ thường
+        if (typeof user_input !== "string") {
+            return false;  // Trả về false nếu user_input không phải là chuỗi
+        }
+
+        // Kiểm tra xem user_input có chứa từ cấm không
+        return keyword_cams.some(keyword_cam => user_input.toLowerCase().includes(keyword_cam.toLowerCase()));
+    }
+
+
+
     const keywords = [
         // Phim-related
         "Phim", "Phim hay", "Phim mới", "Phim chiếu rạp", "Movies", "Movie trailer", "Film", "Film trailer",
@@ -214,6 +246,27 @@ $(document).ready(function () {
         const userInput = $('#user_input').val().trim();
         const imageFile = $('#file_input')[0].files[0]; // Lấy file ảnh từ input
 
+        if (check_tucam(userInput)) {
+            appendMessage(userInput, "user");
+            // Nội dung iframe để hiển thị trong phản hồi AI
+            const iframeContent = `
+                <iframe width="955" height="1698" src="https://www.youtube.com/embed/ogq6a_7nk2Y?autoplay=1&controls=0&rel=0" title="Trần Dần chửi thề c.c nói chuyện vô văn hoá" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            `;
+
+            // Debug: Kiểm tra xem iframe có được tạo đúng không
+            console.log("Iframe Content: ", iframeContent);
+
+            // Sử dụng appendMessage để thêm iframe vào phần phản hồi AI
+            appendMessage(iframeContent, "ai");
+            clear_val(userInput, imageFile);
+            // Cập nhật trạng thái và giao diện nút gửi
+            isSending = false;
+            document.getElementById("send").classList.remove("sending");
+            document.getElementById("send-icon").src = "../static/img/send.png";
+            return;
+        }
+
+
         clear_val(userInput, imageFile);
         let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
         if (userInput === "/new") {
@@ -223,7 +276,7 @@ $(document).ready(function () {
                 contentType: 'application/json',
                 data: JSON.stringify({
                     group_name: "newchat",
-                    description: "Bạn là một con mèo tên là Mi, bạn có thể trả lời câu hỏi của tôi một cách chính xác và đáng yêu" // Mô tả mặc định
+                    description: "Tôi đặt tên cho bạn là Liễu Như Yên, tôi đặt cho bạn giới tính là Nữ, tôi đặt tuổi cho bạn là 23, bạn trả lời một cách đáng yêu" // Mô tả mặc định
                 }),
                 success: function (response) {
                     console.log(response);

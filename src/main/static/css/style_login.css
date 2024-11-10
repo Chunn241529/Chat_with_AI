@@ -50,6 +50,7 @@ body {
     flex: 1;
     font-family: 'Courier New', Courier, monospace;
     padding: 5px;
+    font-size: 18px;
 }
 
 #prompt1 {

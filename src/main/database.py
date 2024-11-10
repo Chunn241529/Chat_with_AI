@@ -68,6 +68,14 @@ cursor.execute(
     """
 )
 
+# Thêm cột flag vào bảng users
+cursor.execute(
+    """
+    ALTER TABLE users
+    ADD COLUMN flag BOOLEAN DEFAULT FALSE;
+    """
+)
+
 # Tạo bảng group_history
 cursor.execute(
     """

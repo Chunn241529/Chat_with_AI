@@ -2,10 +2,10 @@ import os
 import subprocess
 import time
 import json  # Standard Python json module
-from flask import Flask, redirect, render_template, url_for
+from flask import Flask, render_template
 from flask_session import Session
-from chat import app as chat_app
-from authentication import app as auth_app  # Ensure correct blueprint import
+from api.chat import app as chat_app
+from api.authentication import app as auth_app  # Ensure correct blueprint import
 
 # Create main Flask app
 main_app = Flask(__name__)

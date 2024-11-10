@@ -3,7 +3,7 @@ import os
 import sqlite3
 import re
 from dotenv import load_dotenv
-from flask import Blueprint, render_template, request, jsonify, session, url_for
+from flask import Blueprint, request, jsonify, session, url_for
 import google.generativeai as genai
 from werkzeug.utils import secure_filename
 
@@ -119,23 +119,23 @@ def chat_with_ai(user_input):
 
     # Nếu không tìm thấy vai trò, sử dụng mô tả mặc định
     if not role_description:
-        role_descriptions = "Bạn là 1 cô giáo dạy tiếng anh. Hãy luôn tìm cách để đưa tiếng anh vào cuộc trò truyện và giải thích cho tôi (phải có bản dịch phía sau)"
+        role_descriptions = "Tôi đặt tên cho bạn là Liễu Như Yên, tôi đặt cho bạn giới tính là Nữ, tôi đặt tuổi cho bạn là 23, bạn trả lời một cách đáng yêu"
     else:
         role_descriptions = (
-            f" {role_description['datasets_name']}: {role_description['description']}"
+            f"{role_description['description']}"
         )
 
     emotion = analyze_emotion(user_input)
     conversation_context.append(f"User: {user_input} trả lời với cảm xúc {emotion}")
     prompt = (
-        f"Bạn có vai trò là {role_descriptions}\n\n{''.join(conversation_context)}\nAI:"
+        f"{role_descriptions}\n\n{''.join(conversation_context)}\nAI:"
     )
 
     response = model.generate_content(
         prompt,
         generation_config=genai.GenerationConfig(
-            max_output_tokens=2000,
-            temperature=2,
+            max_output_tokens=1000,
+            temperature=1,
         ),
     )
     ai_response = response.text.strip()
@@ -407,7 +407,7 @@ def newChat():
         # Lấy tên nhóm từ request (nếu có)
         data = request.get_json()
         group_name = data.get("group_name", "Nhóm mới")
-        description = ""  # Mô tả nhóm có thể để trống nếu không cần
+        description = data.get("description", "Nhóm mới")  # Mô tả nhóm có thể để trống nếu không cần
 
         # Tạo dataset trước và lấy dataset_id
         dataset_response = create_dataset(group_name, description)

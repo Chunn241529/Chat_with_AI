@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for
 from flask_session import Session
-from chat import app as chat_app
-from authentication import app as auth_app
+from api.chat import app as chat_app
+from api.authentication import app as auth_app
 import secrets
 
 # Tạo một ứng dụng Flask chính

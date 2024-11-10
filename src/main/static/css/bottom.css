@@ -1,12 +1,26 @@
-body .bottom{
-    height: 120px;
-    width:100%;
+body .bottom {
+    height: 0;
+    /* Ban đầu phần .bottom có chiều cao 0 */
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-
+    overflow: hidden;
+    /* Ẩn nội dung khi chưa mở */
+    opacity: 0;
+    /* Ẩn phần này ban đầu */
+    transition: height 0.5s ease, opacity 0.5s ease;
+    /* Thêm hiệu ứng cho height và opacity */
 }
-.bottom .container{
+
+.bottom.open {
+    height: 120px;
+    /* Chiều cao phần mở rộng khi class 'open' được thêm vào */
+    opacity: 1;
+    /* Hiển thị phần .bottom */
+}
+
+.bottom .container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -16,37 +30,42 @@ body .bottom{
     border-radius: 30px;
     margin-bottom: 20px;
 }
-.bottom .container .icon{
+
+.bottom .container .icon {
     background: transparent;
     height: 60px;
     width: 60px;
     border-radius: 14px;
     margin: 0 5px;
-    transition: 0.1s linear transform,0.05s linear opacity;
+    transition: 0.1s linear transform, 0.05s linear opacity;
     background-repeat: no-repeat;
     background-size: cover;
     cursor: pointer;
 }
-.bottom .container .calender{
+
+.bottom .container .calender {
     display: flex;
     justify-content: center;
     flex-direction: column;
     align-items: center;
 }
-.bottom .container .calender p{
-    transform:translateY(3px);
+
+.bottom .container .calender p {
+    transform: translateY(3px);
     font-size: 10px;
     color: red;
     font-weight: 700;
 }
-.bottom .container .calender h1{
 
+.bottom .container .calender h1 {
     font-weight: 100;
 }
-.bottom .container .icon:hover{
+
+.bottom .container .icon:hover {
     transform: translateY(-10px) scale(1.08);
 }
-.bottom .container .icon:active{
+
+.bottom .container .icon:active {
     opacity: 0.7;
     transform: scale(1.07);
 }

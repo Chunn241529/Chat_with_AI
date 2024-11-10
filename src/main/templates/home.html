@@ -46,9 +46,9 @@
             <!-- <div id="icon2" class="icon" onclick='openApp("","Calendar","700px","1200px")'>
                     <p>Sunday</p>
                     <h1>21</h1>
-                </div> -->
+                </div> 
             <div id="icon2" class="icon" onclick='openApp("http://127.0.0.1:7860","Stable Diffusion","700px","1200px")'>
-            </div>
+            </div>-->
             <!-- <div id="icon3" class="icon"></div> -->
             <div id="icon3" class="icon"
                 onclick='openApp("https://codeabinash.github.io/localstorage-notes-application/","Notes","700px","1200px")'>
@@ -76,6 +76,14 @@
         </div>
         <iframe src="../static/app/settings.html" frameborder="0" id="appWindowIframe"></iframe>
     </div>
+
+    <script>
+        window.onload = function () {
+            // Kích hoạt hiệu ứng mở ra cho phần .bottom khi trang load
+            document.querySelector('.bottom').classList.add('open');
+        };
+
+    </script>
 </body>
 
 </html>
