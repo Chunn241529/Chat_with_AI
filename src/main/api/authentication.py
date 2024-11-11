@@ -21,46 +21,6 @@ def get_db_connection():
     return conn
 
 
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if "username" not in session:
-            return redirect(url_for("auth.login"))
-        return f(*args, **kwargs)
-
-    return decorated_function
-
-
-@app.route("/register", methods=["GET"])
-def register():
-    if "username" in session:
-        return redirect(
-            url_for("auth.home")
-        )  # Chuyển hướng đến trang chủ nếu đã đăng nhập
-    return render_template("register.html")
-
-
-@app.route("/login", methods=["GET"])
-def login():
-    if "username" in session:
-        return redirect(
-            url_for("auth.home")
-        )  # Chuyển hướng đến trang chủ nếu đã đăng nhập
-    return render_template("login.html")
-
-
-@app.route("/home", methods=["GET"])
-@login_required
-def home():
-    return render_template("home.html")
-
-
-@app.route("/chat", methods=["GET"])
-@login_required
-def chat():
-    return render_template("chat.html")
-
-
 # Lấy tất cả người dùng
 @app.route("/users", methods=["GET"])
 def get_all_users():
@@ -134,7 +94,7 @@ def login_user():
             if bcrypt.checkpw(password.encode("utf-8"), hashed_password):
                 session["username"] = username  # Lưu username vào session
                 session["user_id"] = user["id"]  # Lưu user_id vào session
-                return redirect("/auth/chat")  # Chuyển hướng đến trang chính
+                return redirect("/home")  # Chuyển hướng đến trang chính
 
             else:
                 return (
@@ -147,43 +107,11 @@ def login_user():
         conn.close()
 
 
-# Lấy thông tin người dùng
-@app.route("/user/<int:user_id>", methods=["GET"])
-def get_user(user_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        user = cursor.execute(
-            "SELECT id, name, username, email, phone, country_code FROM users WHERE id = ?",
-            (user_id,),
-        ).fetchone()
-
-        if user:
-            return (
-                jsonify(
-                    {
-                        "id": user["id"],
-                        "name": user["name"],
-                        "username": user["username"],
-                        "email": user["email"],
-                        "phone": user["phone"],
-                        "country_code": user["country_code"],
-                    }
-                ),
-                200,
-            )
-        else:
-            return jsonify({"error": "User not found."}), 404
-    finally:
-        conn.close()
-
-
 # Đăng xuất
 @app.route("/logout")
 def logout():
     session.pop("username", None)  # Xóa username khỏi session
-    return redirect(url_for("auth.login"))  # Chuyển hướng đến trang đăng nhập
+    return redirect(url_for("/.login"))  # Chuyển hướng đến trang đăng nhập
 
 
 @app.route("/load_chat_history", methods=["GET"])
@@ -254,3 +182,117 @@ def load_chat_history():
 
     finally:
         conn.close()
+
+
+# API lấy thông tin người dùng theo ID
+@app.route("/user/<int:user_id>", methods=["GET"])
+def get_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+
+    if user:
+        return jsonify(
+            {
+                "id": user["id"],
+                "name": user["name"],
+                "username": user["username"],
+                "email": user["email"],
+                "phone": user["phone"],
+                "country_code": user["country_code"],
+                "profile_picture": user["profile_picture"],
+                "bio": user["bio"],
+                "date_of_birth": user["date_of_birth"],
+                "created_at": user["created_at"],
+                "updated_at": user["updated_at"],
+                "flag": user["flag"],
+            }
+        )
+    else:
+        return jsonify({"error": "User not found"}), 404
+
+
+# API chỉnh sửa thông tin người dùng
+@app.route("/user/<int:user_id>", methods=["PUT"])
+def update_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    data = request.get_json()
+    name = data.get("name")
+    username = data.get("username")
+    email = data.get("email")
+    phone = data.get("phone")
+    country_code = data.get("country_code")
+    profile_picture = data.get("profile_picture")
+    bio = data.get("bio")
+    date_of_birth = data.get("date_of_birth")
+    flag = data.get("flag")
+
+    cursor.execute(
+        """
+            UPDATE users 
+            SET name = ?, username = ?, email = ?, phone = ?, country_code = ?, 
+                profile_picture = ?, bio = ?, date_of_birth = ?, flag = ? 
+            WHERE id = ?
+        """,
+        (
+            name,
+            username,
+            email,
+            phone,
+            country_code,
+            profile_picture,
+            bio,
+            date_of_birth,
+            flag,
+            user_id,
+        ),
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "User updated successfully"}), 200
+
+
+# API xóa người dùng
+@app.route("/user/<int:user_id>", methods=["DELETE"])
+def delete_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "User deleted successfully"}), 200
+
+
+# API cấm tài khoản (set flag = TRUE)
+@app.route("/user/ban/<int:user_id>", methods=["PATCH"])
+def ban_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Cập nhật trạng thái flag thành TRUE (cấm tài khoản)
+    cursor.execute("UPDATE users SET flag = TRUE WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "User banned successfully"}), 200
+
+
+# API kích hoạt lại tài khoản (set flag = FALSE)
+@app.route("/user/unban/<int:user_id>", methods=["PATCH"])
+def unban_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Cập nhật trạng thái flag thành FALSE (kích hoạt lại tài khoản)
+    cursor.execute("UPDATE users SET flag = FALSE WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "User unbanned successfully"}), 200

@@ -1,45 +1,38 @@
 import os
 import subprocess
 import time
-import json  # Standard Python json module
-from flask import Flask, render_template
+import json
+from flask import Flask, render_template, jsonify, redirect
 from flask_session import Session
 from api.chat import app as chat_app
-from api.authentication import app as auth_app  # Ensure correct blueprint import
-
-# Create main Flask app
-main_app = Flask(__name__)
-
+from api.authentication import app as auth_app
+from api.controller import app as app
 import secrets
 
-# Generate a secret key
+main_app = Flask(__name__)
+
 secret_key = secrets.token_hex(16)
 print(secret_key)
 
-# Flask-Session configuration
 main_app.config["SESSION_TYPE"] = "filesystem"
-main_app.secret_key = secret_key  # Replace with your actual secret key
+main_app.secret_key = secret_key
 Session(main_app)
 
-# Register blueprints
 main_app.register_blueprint(chat_app, url_prefix="/chat")
 main_app.register_blueprint(auth_app, url_prefix="/auth")
+main_app.register_blueprint(app, url_prefix="/")
 
-ngrok_process = None
-ngrok_url = None
+ngrok_processes = {}
+ngrok_urls = {}
 
 
-def start_ngrok():
-    global ngrok_process, ngrok_url
-    if ngrok_process is not None:
-        print("Ngrok is already running.")
-        return ngrok_process
+def start_ngrok(port):
+    global ngrok_processes, ngrok_urls
+    if port in ngrok_processes:
+        print(f"Ngrok is already running on port {port}.")
+        return ngrok_processes[port]
 
-    # Path to ngrok executable
     ngrok_path = os.path.join(os.path.dirname(__file__), "ngrok", "ngrok.exe")
-    port = 5000  # Flask port
-
-    # Command to start ngrok tunnel with the --label parameter
     ngrok_command = [
         ngrok_path,
         "tunnel",
@@ -48,11 +41,10 @@ def start_ngrok():
         f"http://localhost:{port}",
     ]
 
-    # Start ngrok using subprocess
-    ngrok_process = subprocess.Popen(ngrok_command)
-    time.sleep(5)  # Wait for ngrok to initialize
+    process = subprocess.Popen(ngrok_command)
+    ngrok_processes[port] = process
+    time.sleep(10)
 
-    # Retrieve ngrok URL
     url_process = subprocess.Popen(
         ["curl", "-s", "http://localhost:4040/api/tunnels"], stdout=subprocess.PIPE
     )
@@ -60,32 +52,43 @@ def start_ngrok():
 
     try:
         tunnels = json.loads(output)
-        if "tunnels" in tunnels and len(tunnels["tunnels"]) > 0:
-            public_url = tunnels["tunnels"][0]["public_url"]
-            print("Ngrok URL:", public_url)
-            ngrok_url = public_url  # Store the ngrok URL
-            return ngrok_process
-        else:
-            print("No tunnels found. Check ngrok status.")
-            return None
+        print("Ngrok response:", tunnels)  # In JSON ngrok trả về để kiểm tra
+
+        for tunnel in tunnels.get("tunnels", []):
+            public_url = tunnel.get("public_url")
+            if f"localhost:{port}" in tunnel.get("config", {}).get("addr", ""):
+                print(f"Ngrok URL for port {port}:", public_url)
+                ngrok_urls[port] = public_url
+                return process
+
+        print(f"No tunnel found for port {port}. Check ngrok status.")
+        return None
     except json.JSONDecodeError:
         print("Error parsing JSON response from Ngrok.")
         return None
 
 
-# Start ngrok and store the URL
-ngrok_process = start_ngrok()
+# Khởi chạy ngrok trên các cổng 5000 và 7860
+start_ngrok(5000)
+start_ngrok(7860)
+
+
+@main_app.route("/stable-diffusion")
+def stable_diffusion():
+    # Kiểm tra xem ngrok đã khởi động cho cổng 7860 chưa, nếu chưa thì khởi động
+    if not ngrok_urls.get(7860):
+        start_ngrok(7860)
+
+    # Trả về redirect trực tiếp tới localhost:7860
+    return redirect("http://localhost:7860", code=302)
 
 
 @main_app.route("/")
 def index():
-    if ngrok_url is None:
-        # If ngrok URL is not available, try starting ngrok again
-        start_ngrok()
+    if not ngrok_urls.get(5000):
+        start_ngrok(5000)
 
-    return render_template(
-        "login.html", url_ngrok=ngrok_url
-    )  # Pass ngrok URL to the template
+    return render_template("login.html", url_ngrok_5000=ngrok_urls.get(5000))
 
 
 if __name__ == "__main__":

@@ -16,39 +16,43 @@
 
     <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
 
-    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/openLink.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/time.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/notes.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/openLink.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/time.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/common.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/notes.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/app.js') }}"></script>
 
 
 </head>
 <!-- <body onmousemove="mouseMoved(event)"> -->
 
 <body>
+
     <!-- <div class="statusbar"></div> -->
     <div class="main">
 
-        <div class="right">
-
+        <div class="left" style=" text-align: center; margin: auto; padding: auto;">
+            <div class="time">
+                <h1></h1>
+                <p></p>
+            </div>
         </div>
     </div>
     <div class="bottom">
         <div class="container">
 
             <div id="icon1" class="icon"
-                onclick='openApp("{{ url_ngrok }}/auth/chat", "AI Liễu Như Yên", "700px", "1200px")'></div>
+                onclick='openApp("{{ url_ngrok_5000 }}/chat", "AI Liễu Như Yên", "700px", "1200px")'></div>
 
 
             <!-- <div id="icon2" class="icon" onclick='openApp("","Calendar","700px","1200px")'>
                     <p>Sunday</p>
                     <h1>21</h1>
-                </div> 
-            <div id="icon2" class="icon" onclick='openApp("http://127.0.0.1:7860","Stable Diffusion","700px","1200px")'>
-            </div>-->
+                </div> -->
+            <div id="icon2" class="icon" onclick='openApp("{{ url_ngrok_7860 }}","Stable Diffusion","700px","1200px")'>
+            </div>
             <!-- <div id="icon3" class="icon"></div> -->
             <div id="icon3" class="icon"
                 onclick='openApp("https://codeabinash.github.io/localstorage-notes-application/","Notes","700px","1200px")'>
@@ -66,7 +70,7 @@
     </div>
 
     <div class="appFrame" id="theApp">
-        <div class="bar" id="appBar">
+        <div class="bar">
             <div class="control">
                 <div class="red" style="background-color: red;" onclick="closeApp()"></div>
                 <div class="yellow" style="background-color: yellow;" onclick="closeApp()"></div>
@@ -74,7 +78,7 @@
             </div>
             <div class="appName">Settings</div>
         </div>
-        <iframe src="../static/app/settings.html" frameborder="0" id="appWindowIframe"></iframe>
+        <iframe src="" frameborder="0" id="appWindowIframe"></iframe>
     </div>
 
     <script>

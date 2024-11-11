@@ -88,14 +88,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         // Đợi 1 giây cho hiệu ứng rồi chuyển hướng
                         setTimeout(() => {
-                            window.location.href = "/auth/home";
+                            window.location.href = "/home";
 
                         }, 1000);
                     } else {
                         return response.json().then(data => {
                             displayOutput2(`${data.error || "Đã xảy ra lỗi."}`);
                             setTimeout(() => {
-                                window.location.href = "/auth/login";
+                                window.location.href = "/login";
                             }, 2000);
                         });
                     }

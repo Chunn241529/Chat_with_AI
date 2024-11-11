@@ -1,10 +1,8 @@
 
 function openApp(url, appName, height, width) {
     const app = document.getElementById("theApp");
-    const iframe = document.getElementById("appWindowIframe");
-
-    // Cập nhật URL của iframe
-    iframe.src = url;
+    var win = document.getElementById("appWindowIframe");
+    win.src = url;
 
     // Thiết lập hiển thị, kích thước và độ trong suốt
     app.style.display = "block";

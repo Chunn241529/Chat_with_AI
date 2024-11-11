@@ -2,6 +2,7 @@ from flask import Flask, redirect, url_for
 from flask_session import Session
 from api.chat import app as chat_app
 from api.authentication import app as auth_app
+from api.controller import app as app
 import secrets
 
 # Tạo một ứng dụng Flask chính
@@ -19,12 +20,13 @@ Session(main_app)
 # Đăng ký các blueprint cho từng ứng dụng
 main_app.register_blueprint(chat_app, url_prefix="/chat")
 main_app.register_blueprint(auth_app, url_prefix="/auth")
+main_app.register_blueprint(app, url_prefix="/")
 # main_app.register_blueprint(AI_Image_app, url_prefix="/AIImage")
 
 
 @main_app.route("/")
 def index():
-    return redirect(url_for("auth.login"))
+    return redirect(url_for("/.login"))
 
 
 if __name__ == "__main__":
