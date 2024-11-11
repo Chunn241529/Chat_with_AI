@@ -1,117 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <title>Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>Hồ sơ cá nhân</title>
+    <link rel="icon" type="image/x-icon" href="../static/img/favicon.ico">
 </head>
 
 <body>
     <div class="container-xl px-4 mt-4">
-        <!-- Account page navigation-->
+        <!-- Điều hướng trang tài khoản-->
         <nav class="nav nav-borders">
-            <a class="nav-link active ms-0"
-                href="https://www.bootdey.com/snippets/view/bs5-edit-profile-account-details"
-                target="__blank">Profile</a>
-            <a class="nav-link" href="https://www.bootdey.com/snippets/view/bs5-profile-billing-page"
-                target="__blank">Billing</a>
-            <a class="nav-link" href="https://www.bootdey.com/snippets/view/bs5-profile-security-page"
-                target="__blank">Security</a>
-            <a class="nav-link" href="https://www.bootdey.com/snippets/view/bs5-edit-notifications-page"
-                target="__blank">Notifications</a>
+            <a class="nav-link active ms-0" href="#">Hồ sơ</a>
+            <a class="nav-link" href="#">Thanh toán</a>
+            <a class="nav-link" href="#">Bảo mật</a>
+            <a class="nav-link" href="#">Thông báo</a>
         </nav>
         <hr class="mt-0 mb-4">
         <div class="row">
             <div class="col-xl-4">
-                <!-- Profile picture card-->
+                <!-- Thẻ ảnh đại diện-->
                 <div class="card mb-4 mb-xl-0">
-                    <div class="card-header">Profile Picture</div>
+                    <div class="card-header">Ảnh đại diện</div>
                     <div class="card-body text-center">
-                        <!-- Profile picture image-->
-                        <img class="img-account-profile rounded-circle mb-2"
-                            src="http://bootdey.com/img/Content/avatar/avatar1.png" alt="">
-                        <!-- Profile picture help block-->
-                        <div class="small font-italic text-muted mb-4">JPG or PNG no larger than 5 MB</div>
-                        <!-- Profile picture upload button-->
-                        <button class="btn btn-primary" type="button">Upload new image</button>
+                        <!-- Hình ảnh đại diện-->
+                        <div class="profile-picture-container">
+                            <img id="inputProfilePicture" class="img-account-profile rounded-circle mb-2"
+                                src="http://bootdey.com/img/Content/avatar/avatar1.png" alt="Ảnh đại diện">
+                        </div>
+                        <!-- Hướng dẫn tải ảnh-->
+                        <div class="small font-italic text-muted mb-4">JPG hoặc PNG, không lớn hơn 5 MB</div>
+                        <!-- Nút tải ảnh đại diện-->
+                        <label for="uploadProfilePicture" class="btn btn-primary">Tải ảnh mới</label>
+                        <input type="file" id="uploadProfilePicture" class="form-control" accept="image/*"
+                            style="display: none;" />
                     </div>
                 </div>
             </div>
+
             <div class="col-xl-8">
-                <!-- Account details card-->
+                <!-- Thẻ thông tin tài khoản-->
                 <div class="card mb-4">
-                    <div class="card-header">Account Details</div>
+                    <div class="card-header">Thông tin tài khoản</div>
                     <div class="card-body">
                         <form>
-                            <!-- Form Group (username)-->
+                            <!-- Nhóm Form (tên đầy đủ)-->
                             <div class="mb-3">
-                                <label class="small mb-1" for="inputUsername">Username (how your name will appear to
-                                    other users on the site)</label>
+                                <label class="small mb-1" for="inputName">Tên đầy đủ</label>
+                                <input class="form-control" id="inputName" type="text"
+                                    placeholder="Nhập tên đầy đủ của bạn">
+                            </div>
+                            <!-- Nhóm Form (tên người dùng)-->
+                            <div class="mb-3">
+                                <label class="small mb-1" for="inputUsername">Tên người dùng</label>
                                 <input class="form-control" id="inputUsername" type="text"
-                                    placeholder="Enter your username" value="username">
+                                    placeholder="Nhập tên người dùng của bạn">
                             </div>
-                            <!-- Form Row-->
-                            <div class="row gx-3 mb-3">
-                                <!-- Form Group (first name)-->
-                                <div class="col-md-6">
-                                    <label class="small mb-1" for="inputFirstName">First name</label>
-                                    <input class="form-control" id="inputFirstName" type="text"
-                                        placeholder="Enter your first name" value="Valerie">
-                                </div>
-                                <!-- Form Group (last name)-->
-                                <div class="col-md-6">
-                                    <label class="small mb-1" for="inputLastName">Last name</label>
-                                    <input class="form-control" id="inputLastName" type="text"
-                                        placeholder="Enter your last name" value="Luna">
-                                </div>
-                            </div>
-                            <!-- Form Row        -->
-                            <div class="row gx-3 mb-3">
-                                <!-- Form Group (organization name)-->
-                                <div class="col-md-6">
-                                    <label class="small mb-1" for="inputOrgName">Organization name</label>
-                                    <input class="form-control" id="inputOrgName" type="text"
-                                        placeholder="Enter your organization name" value="Start Bootstrap">
-                                </div>
-                                <!-- Form Group (location)-->
-                                <div class="col-md-6">
-                                    <label class="small mb-1" for="inputLocation">Location</label>
-                                    <input class="form-control" id="inputLocation" type="text"
-                                        placeholder="Enter your location" value="San Francisco, CA">
-                                </div>
-                            </div>
-                            <!-- Form Group (email address)-->
+                            <!-- Nhóm Form (tiểu sử)-->
                             <div class="mb-3">
-                                <label class="small mb-1" for="inputEmailAddress">Email address</label>
-                                <input class="form-control" id="inputEmailAddress" type="email"
-                                    placeholder="Enter your email address" value="name@example.com">
+                                <label class="small mb-1" for="inputBio">Tiểu sử</label>
+                                <textarea class="form-control" id="inputBio"
+                                    placeholder="Viết một tiểu sử ngắn..."></textarea>
                             </div>
-                            <!-- Form Row-->
+                            <!-- Dòng Form-->
                             <div class="row gx-3 mb-3">
-                                <!-- Form Group (phone number)-->
+                                <!-- Nhóm Form (mã quốc gia)-->
                                 <div class="col-md-6">
-                                    <label class="small mb-1" for="inputPhone">Phone number</label>
-                                    <input class="form-control" id="inputPhone" type="tel"
-                                        placeholder="Enter your phone number" value="555-123-4567">
+                                    <label class="small mb-1" for="inputCountryCode">Mã quốc gia</label>
+                                    <input class="form-control" id="inputCountryCode" type="text"
+                                        placeholder="Nhập mã quốc gia của bạn">
                                 </div>
-                                <!-- Form Group (birthday)-->
+                                <!-- Nhóm Form (ngày sinh)-->
                                 <div class="col-md-6">
-                                    <label class="small mb-1" for="inputBirthday">Birthday</label>
-                                    <input class="form-control" id="inputBirthday" type="text" name="birthday"
-                                        placeholder="Enter your birthday" value="06/10/1988">
+                                    <label class="small mb-1" for="inputBirthday">Ngày sinh</label>
+                                    <input class="form-control" id="inputBirthday" type="date"
+                                        placeholder="Nhập ngày sinh của bạn">
                                 </div>
                             </div>
-                            <!-- Save changes button-->
-                            <button class="btn btn-primary" type="button">Save changes</button>
+                            <!-- Nhóm Form (địa chỉ email)-->
+                            <div class="mb-3">
+                                <label class="small mb-1" for="inputEmailAddress">Địa chỉ email</label>
+                                <input class="form-control" id="inputEmailAddress" type="email"
+                                    placeholder="Nhập địa chỉ email của bạn">
+                            </div>
+                            <!-- Nhóm Form (số điện thoại)-->
+                            <div class="mb-3">
+                                <label class="small mb-1" for="inputPhone">Số điện thoại</label>
+                                <input class="form-control" id="inputPhone" type="tel"
+                                    placeholder="Nhập số điện thoại của bạn">
+                            </div>
+                            <!-- Nút lưu thay đổi-->
+                            <button id="saveChangesButton" class="btn btn-primary" type="button">Lưu thay đổi</button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <script src="{{ url_for('static', filename='js/modules/module_profile.js') }}" type="module"></script>
+    <script src="{{ url_for('static', filename='js/profile.js') }}" type="module"></script>
+    <!-- Bao gồm file JavaScript của bạn để tải dữ liệu -->
 </body>
 
 </html>

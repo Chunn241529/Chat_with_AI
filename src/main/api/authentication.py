@@ -185,8 +185,9 @@ def load_chat_history():
 
 
 # API lấy thông tin người dùng theo ID
-@app.route("/user/<int:user_id>", methods=["GET"])
-def get_user(user_id):
+@app.route("/user", methods=["GET"])
+def get_user():
+    user_id = session.get("user_id")
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
@@ -194,6 +195,9 @@ def get_user(user_id):
     conn.close()
 
     if user:
+        # Kiểm tra xem người dùng có bị cấm không
+        is_banned = user["flag"] == 1  # flag == 1 có nghĩa là bị cấm
+
         return jsonify(
             {
                 "id": user["id"],
@@ -208,6 +212,7 @@ def get_user(user_id):
                 "created_at": user["created_at"],
                 "updated_at": user["updated_at"],
                 "flag": user["flag"],
+                "is_banned": is_banned,  # Thêm thông tin bị cấm vào response
             }
         )
     else:
@@ -215,8 +220,9 @@ def get_user(user_id):
 
 
 # API chỉnh sửa thông tin người dùng
-@app.route("/user/<int:user_id>", methods=["PUT"])
-def update_user(user_id):
+@app.route("/user", methods=["PUT"])
+def update_user():
+    user_id = session.get("user_id")
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -259,8 +265,9 @@ def update_user(user_id):
 
 
 # API xóa người dùng
-@app.route("/user/<int:user_id>", methods=["DELETE"])
-def delete_user(user_id):
+@app.route("/user", methods=["DELETE"])
+def delete_user():
+    user_id = session.get("user_id")
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
@@ -270,9 +277,9 @@ def delete_user(user_id):
     return jsonify({"message": "User deleted successfully"}), 200
 
 
-# API cấm tài khoản (set flag = TRUE)
-@app.route("/user/ban/<int:user_id>", methods=["PATCH"])
-def ban_user(user_id):
+@app.route("/user/ban", methods=["PATCH"])
+def ban_user():
+    user_id = session.get("user_id")
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -285,8 +292,9 @@ def ban_user(user_id):
 
 
 # API kích hoạt lại tài khoản (set flag = FALSE)
-@app.route("/user/unban/<int:user_id>", methods=["PATCH"])
-def unban_user(user_id):
+@app.route("/user/unban", methods=["PATCH"])
+def unban_user():
+    user_id = session.get("user_id")
     conn = get_db_connection()
     cursor = conn.cursor()
 

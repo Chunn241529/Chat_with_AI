@@ -1,4 +1,5 @@
 import { module_chat } from './modules/module_chat.js';
+import { module_users } from './modules/module_profile.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Thêm hiệu ứng nhập và xóa cho placeholder
@@ -150,25 +151,44 @@ document.addEventListener('DOMContentLoaded', () => {
         const userInput = $('#user_input').val().trim();
         const imageFile = $('#file_input')[0].files[0]; // Lấy file ảnh từ input
 
+        // Kiểm tra từ cấm
         if (module_chat.check_tucam(userInput)) {
             module_chat.appendMessage(userInput, "user");
+
             // Nội dung iframe để hiển thị trong phản hồi AI
             const iframeContent = `
-                <iframe width="955" height="1698" src="https://www.youtube.com/embed/ogq6a_7nk2Y?autoplay=1&controls=0&rel=0" title="Trần Dần chửi thề c.c nói chuyện vô văn hoá" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-            `;
+        <iframe width="955" height="1698" src="https://www.youtube.com/embed/ogq6a_7nk2Y?autoplay=1&controls=0&rel=0" title="Trần Dần chửi thề c.c nói chuyện vô văn hoá" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    `;
 
-            // Debug: Kiểm tra xem iframe có được tạo đúng không
             console.log("Iframe Content: ", iframeContent);
 
             // Sử dụng appendMessage để thêm iframe vào phần phản hồi AI
             module_chat.appendMessage(iframeContent, "ai");
-            module_chat.clear_val(userInput, imageFile, true)
+            module_chat.clear_val(userInput, imageFile, true);
+
             // Cập nhật trạng thái và giao diện nút gửi
             isSending = false;
             document.getElementById("send").classList.remove("sending");
             document.getElementById("send-icon").src = "../static/img/send.png";
+
+            // Kiểm tra và lưu số lần nhập từ cấm
+            let bannedCount = localStorage.getItem("bannedCount");
+            bannedCount = bannedCount ? parseInt(bannedCount) : 0;
+
+            if (bannedCount >= 3) {
+                // Đã nhập quá 3 lần, tiến hành ban user
+                setTimeout(() => {
+                    module_users.banUser(); // Thực hiện ban user sau 7 giây
+                }, 7000);
+            } else {
+                // Tăng số lần nhập từ cấm
+                bannedCount += 1;
+                localStorage.setItem("bannedCount", bannedCount); // Lưu lại số lần
+            }
+
             return;
         }
+
 
         module_chat.clear_val(userInput, imageFile, true)
 

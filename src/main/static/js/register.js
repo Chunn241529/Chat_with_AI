@@ -82,7 +82,7 @@ $(document).ready(function () {
     $("input[type='text']").keyup(function (event) {
         var focusInput = $(this);
         if (focusInput.val().includes('/dangnhap')) {
-            window.location.href = '/auth/login';
+            window.location.href = '/login';
         }
         if (focusInput.val().length > 1) {
             if ((focusInput.attr('name') == 'email' && !validateEmail(focusInput.val())) ||

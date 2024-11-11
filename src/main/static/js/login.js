@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const value1 = input1.value.trim();
 
         if (value === '/dangky' || value1 === '/dangky') {
-            window.location.href = '/auth/register';
+            window.location.href = '/register';
             return;
         }
 
