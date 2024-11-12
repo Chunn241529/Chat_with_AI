@@ -78,7 +78,6 @@ def analyze_emotion(user_input):
 
     return "bình thường"
 
-
 # Hàm lấy vai trò AI từ nhóm trò chuyện hiện tại
 def get_group_role(group_id):
     conn = get_db_connection()
@@ -119,7 +118,7 @@ def chat_with_ai(user_input):
 
     # Nếu không tìm thấy vai trò, sử dụng mô tả mặc định
     if not role_description:
-        role_descriptions = None
+        role_descriptions = ""
     else:
         role_descriptions = (
             f"{role_description['description']}"

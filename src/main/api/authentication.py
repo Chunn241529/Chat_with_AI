@@ -110,7 +110,9 @@ def login_user():
 # Đăng xuất
 @app.route("/logout")
 def logout():
-    session.pop("username", None)  # Xóa username khỏi session
+    # Xóa user_id và username khỏi session
+    session.pop("user_id", None)
+    session.pop("username", None)
     return redirect(url_for("/.login"))  # Chuyển hướng đến trang đăng nhập
 
 
@@ -287,6 +289,10 @@ def ban_user():
     cursor.execute("UPDATE users SET flag = TRUE WHERE id = ?", (user_id,))
     conn.commit()
     conn.close()
+
+    # Xóa user_id và username khỏi session
+    session.pop("user_id", None)
+    session.pop("username", None)
 
     return jsonify({"message": "User banned successfully"}), 200
 
