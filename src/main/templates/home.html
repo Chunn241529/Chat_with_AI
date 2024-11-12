@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mouse.css') }}">
-    
+
     <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
 
     <script src="{{ url_for('static', filename='js/modules/jquery.js') }}"></script>
@@ -51,14 +51,14 @@
                     <p>Sunday</p>
                     <h1>21</h1>
                 </div> -->
-            <div id="icon2" class="icon" onclick='openApp("{{ url_ngrok_7860 }}","Stable Diffusion","700px","1200px")'>
+            <div id="icon2" class="icon" onclick='openApp("http://127.0.0.1:7860/","Stable Diffusion","700px","1200px")'>
             </div>
             <!-- <div id="icon3" class="icon"></div> -->
             <div id="icon3" class="icon"
                 onclick='openApp("https://codeabinash.github.io/localstorage-notes-application/","Notes","700px","1200px")'>
             </div>
             <a id="icon4" class="icon" href="{{ url_ngrok }}/auth/logout"></a>
-            <!-- <div id="icon6" class="icon" onclick='openApp("","Settings","700px","1200px")'></div> -->
+            <div id="icon6" class="icon" onclick='openApp("{{ url_ngrok }}/profile","Settings","700px","1200px")'></div>
 
             <!-- <div id="icon9" class="icon"></div>
                 <div id="icon11" class="icon" onclick='openApp("https://www.google.com/","Facebook","700px","1200px")'>
@@ -86,7 +86,6 @@
             // Kích hoạt hiệu ứng mở ra cho phần .bottom khi trang load
             document.querySelector('.bottom').classList.add('open');
         };
-
     </script>
 </body>
 

@@ -2,8 +2,7 @@ import { module_chat } from './modules/module_chat.js';
 import { module_users } from './modules/module_profile.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Thêm hiệu ứng nhập và xóa cho placeholder
-
+    module_users.getUser();  // Gọi hàm lấy thông tin user
     let isSending = false;  // Biến trạng thái đang gửi
     let currentFetchController = null;  // Bộ điều khiển để hủy yêu cầu fetch hiện tại
 

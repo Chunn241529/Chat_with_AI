@@ -148,7 +148,7 @@ $(document).ready(function () {
                 // Thêm redirect qua trang đăng nhập sau 2 giây
                 setTimeout(function () {
                     mainContainer.classList.add('fade-out');
-                    window.location.href = "/auth/login";
+                    window.location.href = "/login";
                 }, 2000); // Thời gian chờ 2 giây
             },
             error: function (error) {

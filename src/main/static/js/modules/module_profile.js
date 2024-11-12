@@ -1,9 +1,8 @@
 // module_users.js
 
-// Fetch user information using session-stored userId
 const getUser = async () => {
     try {
-        const response = await fetch(`/auth/user`, { // No need for userId in URL
+        const response = await fetch(`/auth/user`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -14,12 +13,18 @@ const getUser = async () => {
             throw new Error("User not found");
         }
 
-        return await response.json();
+        const user = await response.json();
+
+        // Lưu ảnh đại diện vào localStorage hoặc sessionStorage
+        localStorage.setItem("profile_picture", user.profile_picture); // Lưu base64 vào localStorage
+
+        return user;
     } catch (error) {
         console.error("Error fetching user:", error);
         throw error;
     }
 };
+
 
 // Update user information
 const updateUser = async (userData) => {

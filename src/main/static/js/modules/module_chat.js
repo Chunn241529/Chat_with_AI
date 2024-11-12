@@ -1,3 +1,4 @@
+
 const placeholderText = "Nhập tin nhắn";
 let placeholderIndex = 0;
 let typing = true;
@@ -349,7 +350,7 @@ function appendMessage(message, sender) {
     const isUser = sender === "user";
     const isAI = sender === "ai";
     const avatarUrl = isUser
-        ? "https://randomuser.me/api/portraits/men/32.jpg"
+        ? `${localStorage.getItem("profile_picture")}`
         : "/static/img/ai.png";
     const nickname = isUser ? "User" : "AI";
 

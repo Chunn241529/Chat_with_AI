@@ -119,7 +119,7 @@ def chat_with_ai(user_input):
 
     # Nếu không tìm thấy vai trò, sử dụng mô tả mặc định
     if not role_description:
-        role_descriptions = "Tôi đặt tên cho bạn là Liễu Như Yên, tôi đặt cho bạn giới tính là Nữ, tôi đặt tuổi cho bạn là 23, bạn trả lời một cách đáng yêu"
+        role_descriptions = None
     else:
         role_descriptions = (
             f"{role_description['description']}"

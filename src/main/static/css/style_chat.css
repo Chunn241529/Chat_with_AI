@@ -186,7 +186,8 @@ body::-webkit-scrollbar {
 
 #chat .chat__conversation-board__message__person__avatar img {
     height: 100%;
-    width: auto;
+    width: 100%;
+    object-fit: cover;
 }
 
 #chat .chat__conversation-board__message__person__nickname {

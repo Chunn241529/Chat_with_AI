@@ -108,6 +108,19 @@ cursor.execute(
     """
 )
 
+cursor.execute(
+    """
+    CREATE TABLE IF NOT EXISTS English (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        theme TEXT NOT NULL,                    -- Chủ đề chính
+        subtopics TEXT,                         -- Danh sách các chủ đề phụ
+        vocabulary TEXT,                        -- Danh sách từ vựng (lưu dạng JSON để dễ dàng lưu trữ)
+        sample_conversation TEXT,               -- Đoạn hội thoại mẫu (lưu dạng JSON hoặc text)
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Thời gian tạo
+    )
+    """
+)
+
 # Lưu thay đổi và đóng kết nối
 conn.commit()
 conn.close()
