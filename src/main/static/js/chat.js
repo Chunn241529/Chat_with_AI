@@ -240,8 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Mô tả nhóm không hợp lệ");
             }
         }
-        else if (userInput.startsWith("/ghibai")) {
-            const noidungbai = userInput.slice(8).trim();
+        else if (userInput.startsWith("/takenote")) {
+            const noidungbai = userInput.slice(9).trim();
             // Lưu phản hồi vào conversation history
             let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
             const formattedUserInput = module_chat.formatAndEscapeMessage4User(userInput);
@@ -249,7 +249,39 @@ document.addEventListener('DOMContentLoaded', () => {
             module_chat.appendMessage(formattedUserInput, "user");
 
             if (noidungbai) {
+                isSending = false;  // Cập nhật trạng thái không còn đang gửi
+                document.getElementById("send").classList.remove("sending");  // Cập nhật nút
+                document.getElementById("send-icon").src = "../static/img/send.png";  // Khôi phục icon ban đầu
                 module_chat.englishPattern(noidungbai);
+                module_chat.appendMessage(formattedAiInput, "ai");
+                conversationHistory.push({ sender: 'user', message: formattedUserInput });
+                conversationHistory.push({ sender: 'ai', message: formattedAiInput });
+                console.log("Conversation History After Push:", conversationHistory);  // Debug
+
+                // Lưu lại vào localStorage
+                localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+                console.log("Conversation History Saved to LocalStorage:", JSON.parse(localStorage.getItem('conversationHistory')));  // Debug
+
+                // Lưu vào DB (kiểm tra chức năng này)
+                module_chat.saveConversationHistoryToDB(conversationHistory);
+
+            } else {
+                console.error("Nội dung bài ghi ko hợp lệ");
+            }
+        }
+        else if (userInput.startsWith("/newtopic")) {
+            const noidungbai = userInput.slice(9).trim();
+            // Lưu phản hồi vào conversation history
+            let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
+            const formattedUserInput = module_chat.formatAndEscapeMessage4User(userInput);
+            const formattedAiInput = module_chat.formatAndEscapeMessage4User("Dạ, đã tạo topic mới");
+            module_chat.appendMessage(formattedUserInput, "user");
+
+            if (noidungbai) {
+                isSending = false;  // Cập nhật trạng thái không còn đang gửi
+                document.getElementById("send").classList.remove("sending");  // Cập nhật nút
+                document.getElementById("send-icon").src = "../static/img/send.png";  // Khôi phục icon ban đầu
+                module_chat.createTopic(noidungbai);
                 module_chat.appendMessage(formattedAiInput, "ai");
                 conversationHistory.push({ sender: 'user', message: formattedUserInput });
                 conversationHistory.push({ sender: 'ai', message: formattedAiInput });
@@ -265,7 +297,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Nội dung bài ghi ko hợp lệ");
             }
         }
+        else if (userInput.startsWith("/read")) {
+            // Tách lệnh đọc và ngôn ngữ ra
+            const parts = userInput.slice(5).trim().split(" ");  // Tách chuỗi sau "/read" theo dấu cách
+            const lang = parts[0];  // Ngôn ngữ sẽ là phần đầu tiên
+            const noidungbai = parts.slice(1).join(" ");  // Ghép tất cả phần còn lại thành nội dung bài đọc
 
+            // Kiểm tra xem có đủ thông tin không
+            if (lang && noidungbai) {
+                let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
+                const formattedUserInput = module_chat.formatAndEscapeMessage4User(userInput);
+                const formattedAiInput = module_chat.formatAndEscapeMessage4User(`Dạ, em sẽ đọc bằng giọng ${lang.toUpperCase()}: "${noidungbai}"`);
+
+                // Cập nhật giao diện người dùng
+                module_chat.appendMessage(formattedUserInput, "user");
+                module_chat.appendMessage(formattedAiInput, "ai");
+
+                isSending = false;
+                document.getElementById("send").classList.remove("sending");
+                document.getElementById("send-icon").src = "../static/img/send.png";
+
+                // Gọi API đọc tiếng Anh hoặc tiếng Việt
+                module_chat.readEnglish(lang, noidungbai);
+
+                // Lưu lịch sử trò chuyện vào localStorage
+                conversationHistory.push({ sender: 'user', message: formattedUserInput });
+                conversationHistory.push({ sender: 'ai', message: formattedAiInput });
+                console.log("Conversation History After Push:", conversationHistory);  // Debug
+
+                localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+                console.log("Conversation History Saved to LocalStorage:", JSON.parse(localStorage.getItem('conversationHistory')));  // Debug
+
+                // Lưu vào DB (kiểm tra chức năng này)
+                module_chat.saveConversationHistoryToDB(conversationHistory);
+            } else {
+                console.error("Lệnh không hợp lệ. Định dạng: /read {lang} {nội dung đọc}");
+            }
+        }
         else {
             if (userInput || imageFile) {
                 const formattedUserInput = module_chat.formatAndEscapeMessage4User(userInput);

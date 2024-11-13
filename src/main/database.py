@@ -110,11 +110,21 @@ cursor.execute(
 
 cursor.execute(
     """
+    CREATE TABLE IF NOT EXISTS topics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        topic_name TEXT UNIQUE
+    );
+    """
+)
+
+cursor.execute(
+    """
     CREATE TABLE IF NOT EXISTS vocabulary (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        topic TEXT,
+        topic_id INTEGER,
         term TEXT,
-        definition TEXT
+        definition TEXT,
+        FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE
     );
     """
 )

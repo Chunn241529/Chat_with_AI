@@ -3,6 +3,83 @@ const placeholderText = "Nhập tin nhắn";
 let placeholderIndex = 0;
 let typing = true;
 
+let current_topic_id = null;  // Biến toàn cục để lưu current_topic_id
+
+
+function readEnglish(lang, text) {
+    fetch('/en/read', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            text: text,
+            lang: lang
+        }),
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.file_url) {
+                console.log("File audio URL:", result.file_url);
+
+                // Lấy div có id 'audio'
+                const audioDiv = document.getElementById("audio");
+
+                // Tạo thẻ <audio> mới
+                const audioElement = document.createElement("audio");
+                audioElement.src = result.file_url;  // Đường dẫn đến file âm thanh
+                audioElement.controls = true;
+                audioElement.hidden = true;    // Hiển thị các điều khiển audio (nếu cần)
+
+                // Thêm thẻ <audio> vào trong div 'audio'
+                audioDiv.appendChild(audioElement);
+
+                // Phát âm thanh
+                audioElement.play().then(() => {
+                    console.log("Audio is playing");
+                }).catch((error) => {
+                    console.error("Error playing audio:", error);
+                });
+            } else {
+                console.error("No audio file URL returned:", result);
+            }
+        })
+        .catch(error => {
+            console.error("Error when reading:", error);
+        });
+}
+
+// Hàm để tạo topic mới
+function createTopic(topicName) {
+    if (typeof topicName !== 'string') {
+        console.error("Topic name is invalid");
+        return;
+    }
+
+    // Gửi yêu cầu tạo topic mới
+    fetch('/en/create_topic', {  // Endpoint để tạo topic
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ topic_name: topicName }),
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.topic_id) {
+                // Cập nhật current_topic_id nếu tạo thành công
+                current_topic_id = result.topic_id;
+                console.log("Đã tạo topic với ID:", current_topic_id);
+            } else {
+                console.error("Tạo topic thất bại:", result.message);
+            }
+        })
+        .catch(error => {
+            console.error("Lỗi khi tạo topic:", error);
+        });
+}
+
+// Hàm trích xuất từ vựng và topic từ văn bản nhập vào
 function englishPattern(text) {
     // Kiểm tra nếu text là chuỗi
     if (typeof text !== 'string') {
@@ -10,15 +87,7 @@ function englishPattern(text) {
         return;
     }
 
-    // Biểu thức chính quy cho chủ đề
-    const topicRegex = /Chủ đề:\s*(.*?)(?=\n|$)/i;
-
-    // Biểu thức chính quy cho từ vựng
     const vocabularyRegex = /Từ vựng:\s*([\s\S]*?)(?=\n\n|$)/i;
-
-    // Trích xuất chủ đề
-    const topicMatch = text.match(topicRegex);
-    const topic = topicMatch ? topicMatch[1].trim() : "";
 
     // Trích xuất từ vựng
     const vocabularyMatch = text.match(vocabularyRegex);
@@ -36,14 +105,14 @@ function englishPattern(text) {
         return null;
     }).filter(item => item);  // Loại bỏ các mục null nếu không khớp
 
-    // Tạo dữ liệu để gửi một lần
+    // Tạo dữ liệu để gửi
     const data = {
-        topic: topic,
+        topic_id: current_topic_id,  // Sử dụng current_topic_id đã tạo
         vocabulary: vocabularyItems
     };
 
     // Gửi tất cả từ vựng trong một yêu cầu duy nhất
-    fetch('/en/save_vocabulary_bulk', {   // Đổi URL phù hợp với endpoint lưu từ vựng hàng loạt
+    fetch('/en/save_vocabulary_bulk', {   // Đổi URL phù hợp với endpoint lưu từ vựng
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -204,7 +273,7 @@ function loadChatHistory() {
                     group.history.forEach(item => {
                         // Hiển thị tin nhắn của người dùng
                         const userMessage = formatAndEscapeMessage4User(item.input_text);
-                        if (userMessage && userMessage.trim() !== "") {
+                        if (userMessage) {
                             appendMessage(userMessage, "user");
                         }
 
@@ -495,8 +564,8 @@ function escapeHtml(html) {
         .replace(/'/g, "&#039;");
 }
 
-// Export các API functions
 export const module_chat = {
+    current_topic_id,  // Export current_topic_id
     animatePlaceholder,
     clear_val,
     check_tucam,
@@ -512,4 +581,6 @@ export const module_chat = {
     appendMessage,
     saveConversationHistoryToDB,
     englishPattern,
+    createTopic,
+    readEnglish,
 };

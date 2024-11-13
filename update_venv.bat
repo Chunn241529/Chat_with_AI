@@ -49,6 +49,8 @@ IF NOT EXIST requirements.txt (
         echo gfpgan
         echo Flask
         echo werkzeug
+        echo pyttsx3
+        echo gTTS
     ) > requirements.txt
 ) ELSE (
     echo requirements.txt already exists.

@@ -204,7 +204,7 @@ def upload_image():
     if file and allowed_file(file.filename):
         try:
             # Kiểm tra và tạo thư mục nếu chưa tồn tại
-            upload_folder = os.path.join(app.root_path, "static", "uploads")
+            upload_folder = os.path.join("src", "main", "static", "uploads")
             if not os.path.exists(upload_folder):
                 os.makedirs(upload_folder)
 
@@ -252,17 +252,19 @@ def upload_and_generate_content(image_path, prompt):
         return str(e)
 
 
-def save_image_to_server(image_file):
+def save_image_to_server(image_file, userId):
     # Lưu ảnh vào thư mục uploads
     if image_file and allowed_file(image_file.filename):
         filename = secure_filename(image_file.filename)
-        uploads_folder = os.path.join(app.root_path, "static", "uploads")
+        uploads_folder = os.path.join(
+            "src", "main", "static", "uploads", "image", f"user_{userId}"
+        )
 
         if not os.path.exists(uploads_folder):
             os.makedirs(uploads_folder)
 
         image_path = os.path.join(uploads_folder, filename)
-        image_file.save(image_path)
+        image_file.save(image_path + f"_user-{userId}")
         return image_path
     return None
 
@@ -291,7 +293,7 @@ def generate_content_from_image():
     user_prompt = request.form.get("prompt")
 
     # Lưu ảnh và lấy đường dẫn
-    image_path = save_image_to_server(image_file)
+    image_path = save_image_to_server(image_file, user_id)
 
     if image_path is None:
         return jsonify({"error": "Ảnh không hợp lệ."}), 400
