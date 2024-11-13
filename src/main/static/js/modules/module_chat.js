@@ -3,6 +3,64 @@ const placeholderText = "Nhập tin nhắn";
 let placeholderIndex = 0;
 let typing = true;
 
+function englishPattern(text) {
+    // Kiểm tra nếu text là chuỗi
+    if (typeof text !== 'string') {
+        console.error('text is not a string:', text);
+        return;
+    }
+
+    // Biểu thức chính quy cho chủ đề
+    const topicRegex = /Chủ đề:\s*(.*?)(?=\n|$)/i;
+
+    // Biểu thức chính quy cho từ vựng
+    const vocabularyRegex = /Từ vựng:\s*([\s\S]*?)(?=\n\n|$)/i;
+
+    // Trích xuất chủ đề
+    const topicMatch = text.match(topicRegex);
+    const topic = topicMatch ? topicMatch[1].trim() : "";
+
+    // Trích xuất từ vựng
+    const vocabularyMatch = text.match(vocabularyRegex);
+    const vocabularyText = vocabularyMatch ? vocabularyMatch[1].trim() : "";
+
+    // Kiểm tra và tách từng từ vựng và định nghĩa
+    const vocabularyItems = vocabularyText.split("\n").map(line => {
+        const parts = line.split(":");
+        if (parts.length > 1) {
+            return {
+                term: parts[0].replace(/^\*\s*/, '').trim(),  // Loại bỏ dấu hoa thị và khoảng trắng
+                definition: parts.slice(1).join(":").trim()   // Ghép lại nếu có dấu ":" trong định nghĩa
+            };
+        }
+        return null;
+    }).filter(item => item);  // Loại bỏ các mục null nếu không khớp
+
+    // Tạo dữ liệu để gửi một lần
+    const data = {
+        topic: topic,
+        vocabulary: vocabularyItems
+    };
+
+    // Gửi tất cả từ vựng trong một yêu cầu duy nhất
+    fetch('/en/save_vocabulary_bulk', {   // Đổi URL phù hợp với endpoint lưu từ vựng hàng loạt
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
+        .then(response => response.json())
+        .then(result => {
+            console.log("All vocabulary items saved successfully:", result);
+        })
+        .catch(error => {
+            console.error("Error saving vocabulary items:", error);
+        });
+}
+
+
+
 function animatePlaceholder() {
     const textarea = $('#user_input');
     if (typing) {
@@ -213,15 +271,15 @@ function loadChatHistory() {
 }
 
 function formatAndEscapeMessage4User(message) {
-    // Áp dụng định dạng (bold, italic, link)
     const formattedMessage = message
         .replace(/\*\*(.*?)\*\*/g, '<b style="color: #ce2479;">$1</b>') // Bold
         .replace(/__(.*?)__/g, '<i>$1</i>') // Italic
         .replace(/\[(.*?)\]\((https?:\/\/[^\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>') // Link (chỉ chấp nhận URL bắt đầu với http/https)
-        .replace(/\n/g, '<br>'); // Giữ lại xuống dòng
+        .replace(/\n/g, '<br>'); // Thay \n thành <br> để giữ định dạng xuống dòng
 
     return formattedMessage;
 }
+
 
 function formatAndEscapeMessage(message) {
     // Escape HTML special characters
@@ -453,4 +511,5 @@ export const module_chat = {
     typeWriter,
     appendMessage,
     saveConversationHistoryToDB,
+    englishPattern,
 };

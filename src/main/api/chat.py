@@ -78,6 +78,7 @@ def analyze_emotion(user_input):
 
     return "bình thường"
 
+
 # Hàm lấy vai trò AI từ nhóm trò chuyện hiện tại
 def get_group_role(group_id):
     conn = get_db_connection()
@@ -118,17 +119,22 @@ def chat_with_ai(user_input):
 
     # Nếu không tìm thấy vai trò, sử dụng mô tả mặc định
     if not role_description:
-        role_descriptions = ""
-    else:
-        role_descriptions = (
-            f"{role_description['description']}"
-        )
+        role_descriptions = [
+            "Bạn là giáo viên tiếng Anh, dạy tôi bằng cả tiếng Việt và tiếng Anh. Cung cấp tài liệu chi tiết theo định dạng sau:\n"
+            "Chủ đề: [topic]\n"
+            "Từ vựng:\n"
+            "[từ vựng]: [ý nghĩa]\n"
+            "Đoạn hội thoại:\n"
+            "Person A: ...\n"
+            "Person B: ...\n"
+            "Nếu tôi giao tiếp bình thường, bạn không cần theo format này trừ khi tôi yêu cầu."
+        ]
 
-    emotion = analyze_emotion(user_input)
-    conversation_context.append(f"User: {user_input} trả lời với cảm xúc {emotion}")
-    prompt = (
-        f"{role_descriptions}\n\n{''.join(conversation_context)}\nAI:"
-    )
+    else:
+        role_descriptions = f"{role_description['description']}"
+
+    conversation_context.append(f"User: {user_input}")
+    prompt = f"{role_descriptions}\n\n{''.join(conversation_context)}\nAI:"
 
     response = model.generate_content(
         prompt,
@@ -406,7 +412,9 @@ def newChat():
         # Lấy tên nhóm từ request (nếu có)
         data = request.get_json()
         group_name = data.get("group_name", "Nhóm mới")
-        description = data.get("description", "Nhóm mới")  # Mô tả nhóm có thể để trống nếu không cần
+        description = data.get(
+            "description", "Nhóm mới"
+        )  # Mô tả nhóm có thể để trống nếu không cần
 
         # Tạo dataset trước và lấy dataset_id
         dataset_response = create_dataset(group_name, description)

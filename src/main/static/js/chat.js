@@ -240,6 +240,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Mô tả nhóm không hợp lệ");
             }
         }
+        else if (userInput.startsWith("/ghibai")) {
+            const noidungbai = userInput.slice(8).trim();
+            // Lưu phản hồi vào conversation history
+            let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
+            const formattedUserInput = module_chat.formatAndEscapeMessage4User(userInput);
+            const formattedAiInput = module_chat.formatAndEscapeMessage4User("Dạ, đã lưu bài ghi");
+            module_chat.appendMessage(formattedUserInput, "user");
+
+            if (noidungbai) {
+                module_chat.englishPattern(noidungbai);
+                module_chat.appendMessage(formattedAiInput, "ai");
+                conversationHistory.push({ sender: 'user', message: formattedUserInput });
+                conversationHistory.push({ sender: 'ai', message: formattedAiInput });
+                console.log("Conversation History After Push:", conversationHistory);  // Debug
+
+                // Lưu lại vào localStorage
+                localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+                console.log("Conversation History Saved to LocalStorage:", JSON.parse(localStorage.getItem('conversationHistory')));  // Debug
+
+                // Lưu vào DB (kiểm tra chức năng này)
+                module_chat.saveConversationHistoryToDB(conversationHistory);
+            } else {
+                console.error("Nội dung bài ghi ko hợp lệ");
+            }
+        }
+
         else {
             if (userInput || imageFile) {
                 const formattedUserInput = module_chat.formatAndEscapeMessage4User(userInput);
@@ -269,7 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         })
                             .then(response => response.json())
                             .then(data => {
-                                module_chat.handleResponse(data);
+                                module_chat.handleResponse((data));
+                                // module_chat.englishPattern(data);
+                                // console.log(data)
                             })
                             .catch(error => {
                                 if (error.name === 'AbortError') {
@@ -359,27 +387,36 @@ document.addEventListener('DOMContentLoaded', () => {
                             url: "/chat/send",
                             contentType: "application/json",
                             data: JSON.stringify({ user_input: userInput }),
-                            signal: currentFetchController.signal,
+                            signal: currentFetchController.signal,  // Đảm bảo fetchController được sử dụng đúng.
                             success: function (data) {
+                                // Kiểm tra phản hồi và xử lý nó
                                 module_chat.handleResponse(data);
 
-                                // Lấy phản hồi AI từ dữ liệu và lưu vào conversation history
-                                let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
-                                conversationHistory.push({ sender: 'ai', message: data.response });  // data.response là nội dung phản hồi AI
+                                // Kiểm tra nếu response có dữ liệu hợp lệ (giả sử là 'data.response')
+                                if (data && data.response) {
+                                    // Trích xuất thông tin từ phản hồi AI
+                                    const aiResponse = data.response;
+                                    // Lưu phản hồi vào conversation history
+                                    let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
+                                    conversationHistory.push({ sender: 'ai', message: aiResponse });
+                                    localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+                                    module_chat.saveConversationHistoryToDB(conversationHistory);
 
-                                // Lưu updated conversation history vào localStorage
-                                localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
-
-                                // Lưu conversation history vào DB
-                                module_chat.saveConversationHistoryToDB(conversationHistory);
+                                    console.log(aiResponse);
+                                } else {
+                                    console.error('Không có phản hồi hợp lệ từ AI');
+                                }
                             },
                             error: function (xhr) {
+                                // Nếu có lỗi, xử lý và hiển thị thông báo
                                 module_chat.handleResponse({ response: xhr.responseJSON.error + '' });
                             },
                             complete: function () {
+                                // Cập nhật trạng thái khi hoàn thành
                                 isSending = false;
                             }
                         });
+
                     }
                 }
             }
