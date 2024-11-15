@@ -22,8 +22,7 @@ body {
 }
 
 .container {
-  background: rgb(18 21 30 / 80%);
-  ;
+  background: rgba(0, 0, 0, 0.7);
   color: #6A79A6;
   display: inline-block;
   padding: 0em 2em;
@@ -37,7 +36,7 @@ body {
 
 .container .navigation ol {
   list-style: none;
-  /* background: rgb(18 21 30 / 80%); */
+  /* background: rgba(0, 0, 0, 0.7); */
   position: absolute;
   padding: 30px 0;
   width: 600px;
@@ -199,7 +198,7 @@ body {
   font-size: 14px;
   margin-top: 10px;
   padding-bottom: 30px;
-  /* background: rgb(18 21 30 / 80%); */
+  /* background: rgba(0, 0, 0, 0.7); */
 }
 
 ::-webkit-input-placeholder {

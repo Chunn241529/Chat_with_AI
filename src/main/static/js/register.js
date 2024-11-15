@@ -110,6 +110,7 @@ $(document).ready(function () {
         var name = $('#name').val();
         var username = $('#uname').val();
         var email = $('#email').val();
+        var verificationCode = $('#verificationCode').val();
         var password = $('#password').val();
         var phone = $('#phone').val();
         var country_code = $('#country_code').val();

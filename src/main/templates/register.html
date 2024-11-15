@@ -19,6 +19,7 @@
                 <li><a href="#" data-ref="name">Name</a></li>
                 <li><a href="#" data-ref="uname">Username</a></li>
                 <li><a href="#" data-ref="email">Email</a></li>
+                <li><a href="#" data-ref="verificationCode">Verification Code</a></li>
                 <li><a href="#" data-ref="viewpswd">Password</a></li>
                 <li><a href="#" data-ref="phone">Phone</a></li>
             </ol>
@@ -30,48 +31,64 @@
                 <li>
                     <span><label for="name">Chào, tên bạn là gì?</label></span>
                     <input class="active" id="name" name="name" type="text"
-                        placeholder="Nhập tên của bạn hoặc nhập /dangnhap . . ." autofocus />
+                        placeholder="Nhập tên của bạn hoặc nhập /dangnhap . . ." autofocus autocomplete="off" />
                 </li>
                 <li>
-                    <span><label for="uname">& tôi sẽ gọi bạn là gì?</label></span>
+                    <span><label for="uname">Tôi sẽ gọi bạn là gì?</label></span>
                     <input id="uname" name="username" type="text"
-                        placeholder="Nhập tên tài khoản hoặc nhập /dangnhap . . ." autofocus />
+                        placeholder="Nhập tên tài khoản hoặc nhập /dangnhap . . ." autofocus autocomplete="off" />
                 </li>
                 <li>
                     <span><label for="email">Email của bạn là gì?</label></span>
                     <input id="email" name="email" type="text" placeholder="Nhập Email hoặc nhập /dangnhap . . ."
-                        autofocus />
+                        autofocus autofocus autocomplete="off" />
+                </li>
+                <li>
+                    <span><label for="verificationCode">Nhập mã xác minh đã gửi đến email</label></span>
+                    <input id="verificationCode" name="verificationCode" type="text"
+                        placeholder="Nhập mã xác minh hoặc nhập /dangnhap . . ." autofocus autocomplete="off" />
                 </li>
                 <li>
                     <span><label for="password">Mật khẩu của bạn là gì?</label></span>
-                    <input id="viewpswd" name="password" type="text" placeholder="Đây là mật khẩu của bạn" />
+                    <input id="viewpswd" name="password" type="text" placeholder="Đây là mật khẩu của bạn"
+                        autocomplete="off" />
                     <input id="password" name="password" type="password"
-                        placeholder="Hãy chắc rằng bạn sẽ không quên ^^" autofocus />
+                        placeholder="Hãy chắc rằng bạn sẽ không quên ^^" autofocus autocomplete="off" />
                     <span id="show-pwd" class="view"></span>
                 </li>
                 <li>
                     <span><label for="phone">Nhập số điện thoại</label></span>
                     <select name="countryCode" class="country" id="country_code">
-                        <option value="Việt Nam">+84</option>
-                        <option value="United Kingdom">+44</option>
-                        <option value="United States">+1</option>
-                        <option value="Algeria">+213</option>
-                        <option value="Andorra">+376</option>
-                        <option value="Angola">+244</option>
-                        <option value="Anguilla">+1264</option>
-                        <option value="Antigua & Barbuda">+1268</option>
-                        <option value="Argentina">+54</option>
-                        <option value="Armenia">+374</option>
-                        <option value="Aruba">+297</option>
-                        <option value="Australia">+61</option>
-                        <option value="Austria">+43</option>
-                        <option value="Azerbaijan">+994</option>
-                        <option value="Bahamas">+1242</option>
-
+                        <option value="Việt Nam">+84 VN</option>
+                        <option value="United States">+1 US</option>
+                        <option value="Canada">+1 CA</option>
+                        <option value="United Kingdom">+44 UK</option>
+                        <option value="Australia">+61 AU</option>
+                        <option value="Germany">+49 DE</option>
+                        <option value="France">+33 FR</option>
+                        <option value="Italy">+39 IT</option>
+                        <option value="Spain">+34 ES</option>
+                        <option value="Japan">+81 JP</option>
+                        <option value="South Korea">+82 KR</option>
+                        <option value="China">+86 CN</option>
+                        <option value="India">+91 IN</option>
+                        <option value="Brazil">+55 BR</option>
+                        <option value="Mexico">+52 MX</option>
+                        <option value="Russia">+7 RU</option>
+                        <option value="South Africa">+27 ZA</option>
+                        <option value="Egypt">+20 EG</option>
+                        <option value="Saudi Arabia">+966 SA</option>
+                        <option value="Singapore">+65 SG</option>
+                        <option value="Malaysia">+60 MY</option>
+                        <option value="Thailand">+66 TH</option>
+                        <option value="Indonesia">+62 ID</option>
+                        <option value="Philippines">+63 PH</option>
+                        <option value="New Zealand">+64 NZ</option>
                     </select>
 
 
-                    <input id="phone" name="phone" type="text" autofocus />
+
+                    <input id="phone" name="phone" type="text" autofocus autocomplete="off" />
                 </li>
                 <li>
                     <p style="margin-top: 45px;font-size: 32pt;float:right">

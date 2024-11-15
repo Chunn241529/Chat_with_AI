@@ -1,12 +1,17 @@
 import os
 import subprocess
+import threading
 import time
 import json
 from flask import Flask, render_template, jsonify, redirect
 from flask_session import Session
+import requests
+import schedule
 from api.chat import app as chat_app
 from api.authentication import app as auth_app
 from api.controller import app as app
+from api.english import app as en_app
+from api.modules.sendmail import app as mail_app
 import secrets
 
 main_app = Flask(__name__)
@@ -21,6 +26,8 @@ Session(main_app)
 main_app.register_blueprint(chat_app, url_prefix="/chat")
 main_app.register_blueprint(auth_app, url_prefix="/auth")
 main_app.register_blueprint(app, url_prefix="/")
+main_app.register_blueprint(en_app, url_prefix="/en")
+main_app.register_blueprint(mail_app, url_prefix="/mail")
 
 ngrok_processes = {}
 ngrok_urls = {}
@@ -91,5 +98,40 @@ def index():
     return render_template("login.html", url_ngrok_5000=ngrok_urls.get(5000))
 
 
+def run_sendmail_api():
+    print("Đang gọi API /mail/sendmail...")
+    try:
+        response = requests.post("http://127.0.0.1:5000/mail/sendmail")
+        if response.status_code == 200:
+            print("API /mail/sendmail đã chạy thành công!")
+        else:
+            print(f"Lỗi khi gọi API: {response.status_code} - {response.text}")
+    except Exception as e:
+        print(f"Lỗi khi kết nối đến API: {e}")
+
+
+def schedule_cron_jobs():
+    print("Đang thiết lập cronjob...")
+    # Đảm bảo chỉ thiết lập một lần
+    if len(schedule.jobs) == 0:  # Nếu chưa có job nào
+        schedule.every().day.at("21:35").do(run_sendmail_api)
+    print(f"Các công việc đã được lập lịch: {schedule.jobs}")
+
+    while True:
+        try:
+            schedule.run_pending()
+        except Exception as e:
+            print(f"Lỗi trong cronjob: {e}")
+        time.sleep(1)
+
+
 if __name__ == "__main__":
-    main_app.run(debug=True)
+    try:
+        # Chạy cronjob trong luồng riêng
+        cron_thread = threading.Thread(target=schedule_cron_jobs, daemon=True)
+        cron_thread.start()
+
+        # Chạy Flask server
+        main_app.run(debug=True)
+    except Exception as e:
+        print(f"Đã xảy ra lỗi: {e}")

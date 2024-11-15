@@ -108,6 +108,16 @@ document.addEventListener('DOMContentLoaded', () => {
             input1.blur();
         }
     }
+    // Kiểm tra khi người dùng nhập '/dangky' trong ô nhập liệu
+    input.addEventListener('input', () => {
+        const value = input.value.trim();
+        const value1 = input1.value.trim();
+
+        if (value === '/dangky' || value1 === '/dangky') {
+            window.location.href = '/register';
+        }
+    });
+
 
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {

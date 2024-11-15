@@ -47,6 +47,9 @@ def register_user():
     name = data["name"]
     username = data["username"]
     email = data["email"]
+
+    # làm sao ????? làm sao để kiểm tra code verify có đúng hay không?, lưu db hay sao?
+
     password = data["password"]
     phone = data.get("phone", None)
     country_code = data.get("country_code", None)

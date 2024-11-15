@@ -1,4 +1,5 @@
 import os
+import random
 import sqlite3
 import threading
 from dotenv import load_dotenv
@@ -72,6 +73,50 @@ def sendMail(sender_mail, sender_pw, receiver_mail, subject, body_mail):
         server.quit()
 
 
+def send_verification_email(
+    sender_mail, sender_pw, receiver_mail, subject, verification_code
+):
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
+
+    # Tạo HTML template cho email xác minh
+    html_template = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; background-color: #f4f4f4; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; padding: 20px; box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);">
+            <h2 style="text-align: center; color: #007bff;">Mã xác minh đăng ký của bạn</h2>
+            <p>Mã xác minh:</p>
+            <p style="text-align: center; font-size: 24px; font-weight: bold; color: #d9534f;">
+                {verification_code}
+            </p>
+            <p>Vui lòng không cung cấp mã xác mình cho bất kì ai khác!</p>
+            <p>Trân trọng,<br/>Đội ngũ hỗ trợ</p>
+        </div>
+    </body>
+    </html>
+    """
+
+    # Tạo đối tượng MIMEMultipart để tạo mail
+    msg = MIMEMultipart("alternative")
+    msg["From"] = sender_mail
+    msg["To"] = receiver_mail
+    msg["Subject"] = subject
+
+    # Đính kèm nội dung HTML vào email
+    msg.attach(MIMEText(html_template, "html"))
+
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()  # Bắt đầu TLS (mã hóa bảo mật)
+        server.login(sender_mail, sender_pw)  # Đăng nhập vào email
+        server.sendmail(sender_mail, receiver_mail, msg.as_string())  # Gửi email
+        print(f"Email đã được gửi tới {receiver_mail} thành công!")
+    except Exception as e:
+        print(f"Gửi email tới {receiver_mail} thất bại: {e}")
+    finally:
+        server.quit()
+
+
 email_lock = threading.Lock()
 
 
@@ -108,3 +153,17 @@ def scheduleMail():
             return jsonify({"message": "Emails đã được gửi thành công!"}), 200
     else:
         return jsonify({"message": "Hệ thống đang xử lý, vui lòng thử lại sau."}), 429
+
+    # API gửi mã xác minh
+
+
+@app.route("/send-verification", methods=["POST"])
+def send_verification():
+    email = request.json.get("email")
+    if email:
+        verification_code = str(
+            random.randint(100000, 999999)
+        )  # Tạo mã xác minh ngẫu nhiên
+        send_verification_email(email, verification_code)
+        return jsonify({"message": "Mã xác minh đã được gửi tới email của bạn!"}), 200
+    return jsonify({"error": "Email không hợp lệ!"}), 400

@@ -3,7 +3,7 @@ from flask_session import Session
 from api.chat import app as chat_app
 from api.authentication import app as auth_app
 from api.controller import app as app
-from api.enlish import app as en_app
+from api.english import app as en_app
 from api.modules.sendmail import app as mail_app
 
 import secrets
