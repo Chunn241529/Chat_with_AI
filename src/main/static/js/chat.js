@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Nội dung bài ghi ko hợp lệ");
             }
         }
-        else if (userInput.startsWith("/newtopic")) {
+        else if (userInput.startsWith("/createtopic")) {
             const noidungbai = userInput.slice(9).trim();
             // Lưu phản hồi vào conversation history
             let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];

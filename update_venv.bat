@@ -51,6 +51,7 @@ IF NOT EXIST requirements.txt (
         echo werkzeug
         echo pyttsx3
         echo gTTS
+        echo schedule
     ) > requirements.txt
 ) ELSE (
     echo requirements.txt already exists.
