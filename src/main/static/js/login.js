@@ -95,7 +95,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         return response.json().then(data => {
                             displayOutput2(`${data.error || "Đã xảy ra lỗi."}`);
                             setTimeout(() => {
-                                window.location.href = "/login";
+                                // Thêm lớp fade-out để kích hoạt hiệu ứng
+                                mainContainer.classList.add('fade-out');
+
+                                // Đợi 1 giây cho hiệu ứng rồi chuyển hướng
+                                setTimeout(() => {
+                                    window.location.href = "/login";
+
+                                }, 1000);
                             }, 2000);
                         });
                     }
@@ -114,7 +121,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const value1 = input1.value.trim();
 
         if (value === '/dangky' || value1 === '/dangky') {
-            window.location.href = '/register';
+            // Thêm lớp fade-out để kích hoạt hiệu ứng
+            mainContainer.classList.add('fade-out');
+
+            // Đợi 1 giây cho hiệu ứng rồi chuyển hướng
+            setTimeout(() => {
+                window.location.href = '/register';
+
+            }, 1000);
+
         }
     });
 

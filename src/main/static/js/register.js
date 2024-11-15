@@ -82,7 +82,13 @@ $(document).ready(function () {
     $("input[type='text']").keyup(function (event) {
         var focusInput = $(this);
         if (focusInput.val().includes('/dangnhap')) {
-            window.location.href = '/login';
+            mainContainer.classList.add('fade-out');
+
+            // Đợi 1 giây cho hiệu ứng rồi chuyển hướng
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 1000);
+
         }
         if (focusInput.val().length > 1) {
             if ((focusInput.attr('name') == 'email' && !validateEmail(focusInput.val())) ||
