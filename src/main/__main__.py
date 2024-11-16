@@ -53,7 +53,7 @@ def schedule_cron_jobs():
     print("Đang thiết lập cronjob...")
     # Đảm bảo chỉ thiết lập một lần
     if len(schedule.jobs) == 0:  # Nếu chưa có job nào
-        schedule.every().day.at("07:00").do(run_sendmail_api)
+        schedule.every().day.at("19:05").do(run_sendmail_api)
     print(f"Các công việc đã được lập lịch: {schedule.jobs}")
 
     while True:

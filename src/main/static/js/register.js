@@ -116,10 +116,16 @@ $(document).ready(function () {
         var name = $('#name').val();
         var username = $('#uname').val();
         var email = $('#email').val();
-        var verificationCode = $('#verificationCode').val();
+        var verificationCode = $('#verificationCode').val(); // Lấy mã xác thực
         var password = $('#password').val();
         var phone = $('#phone').val();
         var country_code = $('#country_code').val();
+
+        // Kiểm tra đầu vào (validation cơ bản)
+        if (!name || !username || !email || !verificationCode || !password) {
+            errorMessage($('.error-message'), "Vui lòng nhập đầy đủ thông tin!", 'visible', 1);
+            return;
+        }
 
         // Gửi yêu cầu đăng ký tới API
         $.ajax({
@@ -130,6 +136,7 @@ $(document).ready(function () {
                 name: name,
                 username: username,
                 email: email,
+                verification_code: verificationCode, // Gửi mã xác thực tới API
                 password: password,
                 phone: phone,
                 country_code: country_code
@@ -160,11 +167,52 @@ $(document).ready(function () {
             },
             error: function (error) {
                 // Xử lý lỗi
-                errorMessage($('.error-message'), error.responseJSON.error, 'visible', 1);
+                var errorMessageText = error.responseJSON && error.responseJSON.error
+                    ? error.responseJSON.error
+                    : "Đã xảy ra lỗi. Vui lòng thử lại!";
+                errorMessage($('.error-message'), errorMessageText, 'visible', 1);
             }
         });
     });
 
+    $('#email').on('keypress', function (event) {
+        // Kiểm tra nếu nhấn phím Enter (mã phím là 13)
+        if (event.which === 13) {
+            event.preventDefault(); // Ngăn không cho form submit mặc định
+            sendVerificationCode(); // Gọi hàm gửi mã xác minh
+        }
+    });
+
+    // Hàm gửi mã xác minh
+    function sendVerificationCode() {
+        // Lấy giá trị email
+        var email = $('#email').val();
+
+        // Kiểm tra nếu email rỗng
+        if (!email) {
+            errorMessage($('.error-message'), "Vui lòng nhập email trước khi gửi mã xác minh!", 'visible', 1);
+            return;
+        }
+
+        // Gửi yêu cầu đến API
+        $.ajax({
+            url: "/mail/send-verification",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ email: email }),
+            success: function (response) {
+                // Hiển thị thông báo thành công
+                successMessage($('.success-message'), response.message, 'visible', 1);
+            },
+            error: function (error) {
+                // Hiển thị lỗi
+                var errorMessageText = error.responseJSON && error.responseJSON.error
+                    ? error.responseJSON.error
+                    : "Đã xảy ra lỗi khi gửi mã xác minh. Vui lòng thử lại!";
+                errorMessage($('.error-message'), errorMessageText, 'visible', 1);
+            }
+        });
+    }
 
     $('#show-pwd').mousedown(function () {
         $(this).toggleClass('view').toggleClass('hide');
@@ -194,9 +242,6 @@ function checkDuplicate(field, value, callback) {
         }
     });
 }
-
-
-
 
 function showLi(focusInput) {
 

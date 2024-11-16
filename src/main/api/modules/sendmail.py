@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import os
 import random
 import sqlite3
@@ -84,13 +85,11 @@ def send_verification_email(
     <html>
     <body style="font-family: Arial, sans-serif; color: #333; background-color: #f4f4f4; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; padding: 20px; box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);">
-            <h2 style="text-align: center; color: #007bff;">Mã xác minh đăng ký của bạn</h2>
-            <p>Mã xác minh:</p>
+            <h2 style="text-align: center; color: #007bff;">Mã xác minh của bạn</h2>
+            
             <p style="text-align: center; font-size: 24px; font-weight: bold; color: #d9534f;">
                 {verification_code}
             </p>
-            <p>Vui lòng không cung cấp mã xác mình cho bất kì ai khác!</p>
-            <p>Trân trọng,<br/>Đội ngũ hỗ trợ</p>
         </div>
     </body>
     </html>
@@ -159,11 +158,54 @@ def scheduleMail():
 
 @app.route("/send-verification", methods=["POST"])
 def send_verification():
-    email = request.json.get("email")
+    email = request.json.get("email")  # Lấy email từ client
+
     if email:
         verification_code = str(
             random.randint(100000, 999999)
         )  # Tạo mã xác minh ngẫu nhiên
-        send_verification_email(email, verification_code)
-        return jsonify({"message": "Mã xác minh đã được gửi tới email của bạn!"}), 200
+
+        # Cấu hình thông tin gửi email
+        sender_mail = os.getenv("SENDER_EMAIL")  # Đọc từ biến môi trường
+        sender_pw = os.getenv("SENDER_PASSWORD")
+        subject = "Mã xác minh tài khoản của bạn"
+
+        # Tính thời gian hết hạn (5 phút kể từ bây giờ)
+        expires_at = (datetime.now() + timedelta(minutes=5)).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+
+        # Kết nối cơ sở dữ liệu
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        try:
+            # Lưu mã xác minh vào bảng verification_codes
+            cursor.execute(
+                """
+                INSERT INTO verification_codes (verification_code, expires_at)
+                VALUES (?, ?)
+                """,
+                (verification_code, expires_at),
+            )
+            conn.commit()
+
+            # Gửi email xác minh
+            send_verification_email(
+                sender_mail=sender_mail,
+                sender_pw=sender_pw,
+                receiver_mail=email,
+                subject=subject,
+                verification_code=verification_code,
+            )
+            return (
+                jsonify({"message": "Mã xác minh đã được gửi tới email của bạn!"}),
+                200,
+            )
+        except Exception as e:
+            conn.rollback()  # Rollback nếu có lỗi
+            return jsonify({"error": f"Lỗi hệ thống: {str(e)}"}), 500
+        finally:
+            conn.close()
+
     return jsonify({"error": "Email không hợp lệ!"}), 400

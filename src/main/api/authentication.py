@@ -1,3 +1,4 @@
+from datetime import datetime
 from functools import wraps
 from flask import (
     Blueprint,
@@ -40,38 +41,82 @@ def get_all_users():
         conn.close()
 
 
-# Đăng ký người dùng mới
 @app.route("/register", methods=["POST"])
 def register_user():
     data = request.json
-    name = data["name"]
-    username = data["username"]
-    email = data["email"]
+    name = data.get("name")
+    username = data.get("username")
+    email = data.get("email")
+    verification_code = data.get("verification_code")  # Mã xác thực được gửi từ client
+    password = data.get("password")
+    phone = data.get("phone")
+    country_code = data.get("country_code")
 
-    # làm sao ????? làm sao để kiểm tra code verify có đúng hay không?, lưu db hay sao?
+    # Kiểm tra đầu vào
+    if not all([name, username, email, password, verification_code]):
+        return jsonify({"error": "Thiếu thông tin đăng ký."}), 400
 
-    password = data["password"]
-    phone = data.get("phone", None)
-    country_code = data.get("country_code", None)
-
-    # Mã hóa mật khẩu trước khi lưu
-    hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-
+    # Kết nối cơ sở dữ liệu
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
+        # Kiểm tra mã xác thực
         cursor.execute(
-            "INSERT INTO users (name, username, email, password, phone, country_code) VALUES (?, ?, ?, ?, ?, ?)",
+            """
+            SELECT id, used, expires_at 
+            FROM verification_codes 
+            WHERE verification_code = ? AND used = 0
+            """,
+            (verification_code,),
+        )
+        verification = cursor.fetchone()
+
+        if not verification:
+            return (
+                jsonify({"error": "Mã xác thực không hợp lệ hoặc đã được sử dụng."}),
+                400,
+            )
+
+        verification_id, used, expires_at = verification
+
+        # Kiểm tra thời gian hết hạn
+        if (
+            expires_at
+            and datetime.strptime(expires_at, "%Y-%m-%d %H:%M:%S") < datetime.now()
+        ):
+            return jsonify({"error": "Mã xác thực đã hết hạn."}), 400
+
+        # Mã hóa mật khẩu trước khi lưu
+        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+
+        # Lưu thông tin người dùng vào bảng users
+        cursor.execute(
+            """
+            INSERT INTO users (name, username, email, password, phone, country_code)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
             (name, username, email, hashed_password, phone, country_code),
         )
+        user_id = cursor.lastrowid  # Lấy ID người dùng vừa tạo
+
+        # Cập nhật lại bảng verification_codes với user_id và thay đổi trạng thái used
+        cursor.execute(
+            """
+            UPDATE verification_codes
+            SET used = 1, user_id = ?
+            WHERE id = ?
+            """,
+            (user_id, verification_id),
+        )
+
+        # Commit giao dịch
         conn.commit()
-        return (
-            jsonify({"message": "Đăng ký thành công!"}),
-            201,
-        )  # Gửi phản hồi thành công
+        return jsonify({"message": "Đăng ký thành công!"}), 201
     except sqlite3.IntegrityError:
-        return jsonify({"error": "Đăng ký thất bại!"}), 400
+        return jsonify({"error": "Tên người dùng hoặc email đã tồn tại."}), 400
+    except Exception as e:
+        return jsonify({"error": f"Lỗi hệ thống: {str(e)}"}), 500
     finally:
         conn.close()
 

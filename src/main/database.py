@@ -129,6 +129,21 @@ cursor.execute(
     """
 )
 
+# Tạo bảng verification_codes
+cursor.execute(
+    """
+    CREATE TABLE IF NOT EXISTS verification_codes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,                          -- Khóa phụ đến bảng users
+        verification_code TEXT NOT NULL,          -- Mã xác thực
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời gian tạo mã xác thực
+        expires_at TIMESTAMP,                     -- Thời gian hết hạn mã xác thực
+        used BOOLEAN DEFAULT FALSE,               -- Trạng thái sử dụng của mã
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    );
+    """
+)
+
 # Lưu thay đổi và đóng kết nối
 conn.commit()
 conn.close()
