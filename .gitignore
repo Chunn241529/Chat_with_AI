@@ -3,5 +3,6 @@
 flask_session/
 chatbot.db
 scr/main/.env
+src\main\static\uploads
 commit_git.bat
 update_venv.bat
