@@ -50,15 +50,15 @@ def login_required(f):
 
 @app.route("/register", methods=["GET"])
 def register():
-    if "user_id" in session:
-        return render_template("home.html")
+    if "username" in session:
+        return redirect("/chat")
     return render_template("register.html")
 
 
 @app.route("/login", methods=["GET"])
 def login():
-    if "user_id" in session:
-        return render_template("home.html")
+    if "username" in session:
+        return redirect("/chat")
     return render_template("login.html")
 
 

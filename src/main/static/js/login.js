@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         // Đợi 1 giây cho hiệu ứng rồi chuyển hướng
                         setTimeout(() => {
-                            window.location.href = "/home";
+                            window.location.href = "/chat";
 
                         }, 1000);
                     } else {

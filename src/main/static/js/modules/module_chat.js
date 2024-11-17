@@ -351,6 +351,16 @@ function formatAndEscapeMessage4User(message) {
 
 
 function formatAndEscapeMessage(message) {
+    // Nếu `message` là một mảng, xử lý từng phần tử
+    if (Array.isArray(message)) {
+        return message.map(msg => formatAndEscapeMessage(msg)).join('<br>');  // Gọi lại hàm với từng phần tử trong mảng
+    }
+
+    // Kiểm tra nếu `message` là chuỗi
+    if (typeof message !== 'string') {
+        return '';  // Trả về chuỗi rỗng nếu không phải chuỗi
+    }
+
     // Escape HTML special characters
     const escapedMessage = message.replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -365,6 +375,7 @@ function formatAndEscapeMessage(message) {
         .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>') // Link
         .replace(/\n\s*\*\s(.*)/g, '<li>$1</li>'); // Danh sách
 }
+
 
 function extractCodeAndText(responseMessage) {
     // Trích xuất text và code blocks từ phản hồi
@@ -554,7 +565,6 @@ $(document).on('click', '.copy-button', function () {
     });
 });
 
-
 function escapeHtml(html) {
     return html
         .replace(/&/g, "&amp;")
@@ -563,6 +573,8 @@ function escapeHtml(html) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
+
 
 export const module_chat = {
     current_topic_id,  // Export current_topic_id

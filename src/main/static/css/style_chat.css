@@ -108,7 +108,7 @@ body::-webkit-scrollbar {
 #chat .chat__conversation-board {
     padding: 1em 0 2em;
     height: calc(110vh - 55px - 2em - 25px * 2 - .5em - 3em);
-    width: 50%;
+    width: 60%;
     overflow: hidden;
     margin: 0.5em auto;
 
@@ -269,14 +269,14 @@ body::-webkit-scrollbar {
     padding: 0;
     height: 80px;
     margin: 0.5em auto;
-    width: 25%;
+    width: 16%;
     display: flex;
     align-items: center;
     transition: width 0.3s ease;
 }
 
 #chat .chat__conversation-panel:focus-within {
-    width: 50%;
+    width: 30%;
 }
 
 #chat .chat__conversation-panel__container {
@@ -539,4 +539,28 @@ img {
     background-color: #929292;
     color: white;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-menu {
+    min-width: 150px;
+    font-size: 14px;
+}
+
+.dropdown-menu a {
+    text-decoration: none;
+    color: #333;
+    padding: 10px;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f8f9fa;
+    cursor: pointer; /* Thêm hiệu ứng khi hover */
+}
+
+#avatarDropdown {
+    width: 40px; /* Đảm bảo chiều rộng cố định */
+    height: 40px; /* Đảm bảo chiều cao cố định */
+    border-radius: 50%; /* Bo tròn để tạo hình tròn */
+    object-fit: cover; /* Đảm bảo ảnh lấp đầy nhưng không méo */
+    cursor: pointer; /* Thêm hiệu ứng khi hover */
 }

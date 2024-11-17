@@ -31,7 +31,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    module_chat.loadChatHistory();
+    const chatHistory = module_chat.loadChatHistory();
+
+    // Kiểm tra nếu lịch sử rỗng hoặc không tồn tại
+    if (!chatHistory || chatHistory.length === 0) {
+        // Hiển thị started_message
+        const started_message = [
+            "Nhập **/list** để xem các tin nhắn khác\n",
+            "Nhập **/createtopic [topic]** để tạo chủ đề ghi bài mới\n",
+            "Nhập **/takenote Từ vựng: [từ vựng]:[ý nghĩa từ vựng]** để ghi bài mới\n",
+            "Nhập **/read ['vi' hoặc 'en'] [từ vựng hoặc đoạn văn]** để AI đọc cho bạn nghe"
+        ];
+        module_chat.appendMessage(module_chat.formatAndEscapeMessage(started_message), "ai");
+    } else {
+        // Nếu có dữ liệu, hiển thị lịch sử trò chuyện
+        chatHistory.forEach(message => {
+            module_chat.appendMessage(module_chat.formatAndEscapeMessage([message.text]), message.sender);
+        });
+    }
+
 
     $('#response').scrollTop($('#response')[0].scrollHeight);
     $('#user_input').focus();
@@ -270,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         else if (userInput.startsWith("/createtopic")) {
-            const noidungbai = userInput.slice(9).trim();
+            const noidungbai = userInput.slice(12).trim();
             // Lưu phản hồi vào conversation history
             let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
             const formattedUserInput = module_chat.formatAndEscapeMessage4User(userInput);

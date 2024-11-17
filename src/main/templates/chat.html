@@ -8,9 +8,12 @@
     <link rel="icon" type="image/x-icon" href="../static/img/favicon.ico">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="module" src="{{ url_for('static', filename='js/modules/module_chat.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modules/app.js') }}"></script>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style_chat.css') }}">
 </head>
 
@@ -96,10 +99,45 @@
         <div id="audio">
 
         </div>
+        <div class="dropdown" style="position: absolute; top: 10px; right: 40px;">
+            <img src="" alt="Avatar" class="dropdown-toggle" id="avatarDropdown" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false"
+                style="width: 40px; height: 40px; border-radius: 50%; cursor: pointer;">
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="avatarDropdown">
+                <!-- <a class="dropdown-item" href="#settings">Settings</a> -->
+                <a class="dropdown-item"
+                    onclick='openApp("{{ url_ngrok }}/profile","Settings","700px","1200px")'>Thông tin cá nhân</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="/auth/logout">Đăng xuất</a>
+            </div>
+        </div>
+        <div class="appFrame" id="theApp">
+            <div class="bar">
+                <div class="control">
+                    <div class="red" style="background-color: red;" onclick="closeApp()"></div>
+                    <div class="yellow" style="background-color: yellow;" onclick="closeApp()"></div>
+                    <div class="green" style="background-color: lime;" onclick="appFullScreen()"></div>
+                </div>
+                <div class="appName">Settings</div>
+            </div>
+            <iframe src="" frameborder="0" id="appWindowIframe"></iframe>
+        </div>
+
+        <script type="module">
+            document.addEventListener("DOMContentLoaded", function () {
+                const profilePicture = localStorage.getItem("profile_picture") || "https://via.placeholder.com/40";
+                const avatarImg = document.getElementById("avatarDropdown");
+                avatarImg.src = profilePicture;
+            });
+
+
+        </script>
 
         <!-- <script src="{{ url_for('static', filename='componant_modal.js') }}"></script> -->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     </div>
 </body>
 
