@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat với tui</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-okaidia.css" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
     <link rel="icon" type="image/x-icon" href="../static/img/favicon.ico">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
@@ -19,6 +23,21 @@
 
 <body>
     <div class="--dark-theme" id="chat">
+        <div class="header">
+            <div class="dropdown" style="position: absolute; top: 10px; right: 40px;">
+                <img src="" alt="Avatar" class="dropdown-toggle" id="avatarDropdown" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false"
+                    style="width: 40px; height: 40px; border-radius: 50%; cursor: pointer;">
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="avatarDropdown">
+                    <!-- <a class="dropdown-item" href="#settings">Settings</a> -->
+                    <a class="dropdown-item"
+                        onclick='openApp("{{ url_ngrok }}/profile","Settings","700px","1200px")'>Thông
+                        tin cá nhân</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="/auth/logout">Đăng xuất</a>
+                </div>
+            </div>
+        </div>
         <!-- <div id="menubar">
             <div id="team-picker">
                 <ul class="teams">
@@ -99,18 +118,7 @@
         <div id="audio">
 
         </div>
-        <div class="dropdown" style="position: absolute; top: 10px; right: 40px;">
-            <img src="" alt="Avatar" class="dropdown-toggle" id="avatarDropdown" data-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false"
-                style="width: 40px; height: 40px; border-radius: 50%; cursor: pointer;">
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="avatarDropdown">
-                <!-- <a class="dropdown-item" href="#settings">Settings</a> -->
-                <a class="dropdown-item"
-                    onclick='openApp("{{ url_ngrok }}/profile","Settings","700px","1200px")'>Thông tin cá nhân</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="/auth/logout">Đăng xuất</a>
-            </div>
-        </div>
+
         <div class="appFrame" id="theApp">
             <div class="bar">
                 <div class="control">
@@ -129,6 +137,12 @@
                 const avatarImg = document.getElementById("avatarDropdown");
                 avatarImg.src = profilePicture;
             });
+            document.addEventListener('DOMContentLoaded', (event) => {
+                document.querySelectorAll('pre code').forEach((block) => {
+                    Prism.highlightElement(block);
+                });
+            });
+
 
 
         </script>
@@ -139,6 +153,7 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     </div>
+
 </body>
 
 </html>

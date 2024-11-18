@@ -79,6 +79,7 @@ body::-webkit-scrollbar {
     display: flex;
     flex-direction: column;
     height: 100%;
+    padding-top: 60px;
 }
 
 .chat__conversation-area {
@@ -111,7 +112,6 @@ body::-webkit-scrollbar {
     width: 60%;
     overflow: hidden;
     margin: 0.5em auto;
-
 }
 
 #chat .chat__conversation-board {
@@ -414,33 +414,61 @@ body::-webkit-scrollbar {
 }
 
 .code-block {
-    position: relative;
-    border: 1px solid #777777f2;
-    border-radius: 5px;
-    padding: 10px;
-    background-color: #777777f2;
+    background-color: #f4f4f4;
+    border-radius: 4px;
+    margin: 15px 0;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.code-block pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
+.code-header {
+    background-color: #f4f4f4;
+    /* Đồng bộ màu với code-block */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.code-language {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    font-weight: bold;
+    color: #555;
+    margin: 0;
+    text-align: left;
+    display: inline-block;
 }
 
 .copy-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: #007bff;
-    color: white;
+    background-color: #4CAF50;
     border: none;
-    border-radius: 3px;
+    color: white;
     padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 12px;
     cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 .copy-button:hover {
-    background-color: #0056b3;
+    background-color: #45a049;
 }
+
+.code-block pre {
+    margin: 0;
+    padding: 15px;
+    overflow-x: auto;
+    font-size: 13px;
+}
+
+.code-block code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
 
 .modal-full {
     max-width: 80%;
@@ -508,7 +536,6 @@ img {
 .link-container {
     display: flex;
     gap: 16px;
-    /* Tăng khoảng cách giữa các box link */
     flex-wrap: wrap;
     margin-top: 8px;
     margin: 4px;
@@ -519,13 +546,11 @@ img {
     background-color: #181717;
     border-radius: 5px;
     padding: 8px 12px;
-    /* Tăng padding để nội dung có thêm không gian */
     text-align: center;
     font-size: 0.9em;
     display: inline-block;
     transition: all 0.3s ease;
     margin: 8px 4px;
-    /* Thêm margin để mỗi box cách xa nhau hơn */
 }
 
 /* Style cho link */
@@ -554,13 +579,27 @@ img {
 
 .dropdown-menu a:hover {
     background-color: #f8f9fa;
-    cursor: pointer; /* Thêm hiệu ứng khi hover */
+    cursor: pointer;
 }
 
 #avatarDropdown {
-    width: 40px; /* Đảm bảo chiều rộng cố định */
-    height: 40px; /* Đảm bảo chiều cao cố định */
-    border-radius: 50%; /* Bo tròn để tạo hình tròn */
-    object-fit: cover; /* Đảm bảo ảnh lấp đầy nhưng không méo */
-    cursor: pointer; /* Thêm hiệu ứng khi hover */
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.header {
+    width: 100%;
+    height: 60px;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 20px;
+    position: fixed;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid transparent;
 }
