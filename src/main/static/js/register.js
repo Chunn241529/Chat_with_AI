@@ -60,8 +60,9 @@ $(document).ready(function () {
                 if (focusInput.attr('name') == 'username' || focusInput.attr('name') == 'email') {
                     checkDuplicate(focusInput.attr('name'), focusInput.val(), function (isDuplicate) {
                         if (isDuplicate) {
-                            errorMessage(erroEle, focusInput.attr('name') + " Đã tồn tại.", 'visible', 1);
+                            errorMessage(erroEle, focusInput.attr('name') + " đã tồn tại.", 'visible', 1);
                         } else {
+                            sendVerificationCode(); // Gọi hàm gửi mã xác minh
                             if (type != 'navi') showLi(focusInput);
                             $('#next-page').css('opacity', 0);
                             errorMessage(erroEle, '', 'hidden', 0);
@@ -175,13 +176,6 @@ $(document).ready(function () {
         });
     });
 
-    $('#email').on('keypress', function (event) {
-        // Kiểm tra nếu nhấn phím Enter (mã phím là 13)
-        if (event.which === 13) {
-            event.preventDefault(); // Ngăn không cho form submit mặc định
-            sendVerificationCode(); // Gọi hàm gửi mã xác minh
-        }
-    });
 
     // Hàm gửi mã xác minh
     function sendVerificationCode() {

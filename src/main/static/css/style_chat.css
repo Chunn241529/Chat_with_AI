@@ -109,7 +109,7 @@ body::-webkit-scrollbar {
 #chat .chat__conversation-board {
     padding: 1em 0 2em;
     height: calc(110vh - 55px - 2em - 25px * 2 - .5em - 3em);
-    width: 60%;
+    width: 50%;
     overflow: hidden;
     margin: 0.5em auto;
 }

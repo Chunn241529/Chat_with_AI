@@ -271,44 +271,70 @@ function containsKeyword(user_input) {
 }
 
 function loadChatHistory() {
-    $.ajax({
-        type: "GET",
-        url: "/auth/load_chat_history",
-        success: function (data) {
-            console.log(data);
+    fetch('/auth/load_chat_history', { method: 'GET' })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data); // Kiểm tra dữ liệu phản hồi
             if (data.conversations && Array.isArray(data.conversations)) {
                 data.conversations.forEach(group => {
                     group.history.forEach(item => {
+                        // Hiển thị tin nhắn của người dùng
                         const userMessage = formatAndEscapeMessage4User(item.input_text);
                         if (userMessage) {
                             appendMessage(userMessage, "user");
                         }
 
+                        // Kiểm tra và hiển thị hình ảnh nếu có
                         if (item.img_base64 && item.img_base64.length > 0) {
                             appendMessage(item.img_base64, "user");
                         }
 
-                        const aiResponse = item.ai_response;
-                        const aiMessageBubble = appendMessage("Loading message...", "ai");
+                        // Lưu trữ phản hồi AI
+                        let aiResponse = item.ai_response;
+                        const aiMessageBubble = appendMessage("Đang load tin nhắn...", "ai");
 
-                        const { text, codeBlocks, links } = extractCodeAndText(aiResponse);
+                        // Tách text và code blocks từ aiResponse
+                        const { text, codeBlocks } = extractCodeAndText(aiResponse);
                         let formattedText = formatAndEscapeMessage(text);
-                        let finalMessage = formattedText;
+                        let finalMessage = formattedText + "<br>";
 
-                        codeBlocks.forEach(({ language, code }) => {
-                            finalMessage += createCodeBlock(code, language);
+                        // Xử lý các code blocks nếu có
+                        const seenLanguages = new Set();
+                        codeBlocks.forEach(({ language, codeBlock }) => {
+                            const languageTitle = `<p><b>${language.charAt(0).toUpperCase() + language.slice(1)}:</b></p>`;
+                            formattedText = formattedText.replace(languageTitle, '');
+
+                            if (!seenLanguages.has(language)) {
+                                finalMessage += languageTitle;
+                                seenLanguages.add(language);
+                            }
+
+                            finalMessage += createCodeBlock(codeBlock, language);
                         });
 
-                        if (links.length > 0) {
-                            finalMessage += '<div class="links-container">';
+                        // Tìm và thêm các liên kết từ aiResponse
+                        const linkRegex = /(https?:\/\/[^\s,]+)/g;
+                        let links = aiResponse.match(linkRegex);
+
+                        // Add links if any
+                        if (links && links.length > 0) {
                             links.forEach(link => {
-                                const linkShort = getDomainName(link);
+                                const linkShort = getDomainName(link) + "...";
                                 finalMessage += `<div class="link-box"><a href="${link}" target="_blank">${linkShort}</a></div>`;
                             });
-                            finalMessage += '</div>';
+                            finalMessage += "</div>"; // Thêm thẻ đóng div.links nếu có liên kết
+                            finalMessage = finalMessage.replace(links, '');
                         }
 
+                        // Thêm nội dung vào DOM với innerHTML để xử lý HTML
                         aiMessageBubble.innerHTML = finalMessage;
+
+                        // Gọi typeWriter để hiển thị nội dung của aiMessageBubble
                         typeWriter(aiMessageBubble, finalMessage, 0);
                     });
                 });
@@ -316,13 +342,13 @@ function loadChatHistory() {
                 console.error("No conversations found or data is not an array.");
             }
             $('#response').scrollTop($('#response')[0].scrollHeight);
-        },
-        error: function (xhr) {
-            console.error('AJAX error:', xhr);
-            $('#response').append('<div class="error"><strong>Error:</strong> ' + xhr.responseJSON.error + '</div>');
-        }
-    });
+        })
+        .catch(error => {
+            console.error('Fetch error:', error); // Log lỗi
+            $('#response').append('<div class="error"><strong>Error:</strong> ' + error.message + '</div>');
+        });
 }
+
 
 function formatAndEscapeMessage4User(message) {
     const formattedMessage = message
@@ -363,45 +389,55 @@ function formatAndEscapeMessage(message) {
 
 
 function extractCodeAndText(responseMessage) {
+    // Trích xuất text và code blocks từ phản hồi
     const codeBlocks = [];
-    const links = [];
+    let links = [];
+
+    // Giả sử các liên kết sẽ được chứa trong phản hồi dưới dạng URL
     const urlRegex = /(https?:\/\/[^\s]+)/g;
-    links.push(...(responseMessage.match(urlRegex) || []));
+    links = responseMessage.match(urlRegex) || [];
 
-    const codeBlockRegex = /```(\w*)\n([\s\S]*?)```/g;
-    let text = responseMessage;
+    // Xử lý các khối mã
+    const codeBlockRegex = /```(.*?)```/gs;
     let match;
-
     while ((match = codeBlockRegex.exec(responseMessage)) !== null) {
-        const language = match[1] || 'plaintext';
-        const code = match[2].trim();
-        codeBlocks.push({ language, code });
-        text = text.replace(match[0], '');
+        codeBlocks.push({ language: "Unknown", codeBlock: match[1] });
     }
 
-    text = text.trim();
+    // Trả về text và các khối mã
+    const text = responseMessage.replace(codeBlockRegex, '').trim();
+
     return { text, codeBlocks, links };
 }
 
 function handleResponse(data, links = []) {
     const responseMessage = data.response;
-    const { text, codeBlocks, links: extractedLinks } = extractCodeAndText(responseMessage);
+    const { text, codeBlocks } = extractCodeAndText(responseMessage);
 
     let formattedText = formatAndEscapeMessage(text);
-    let finalMessage = formattedText;
+    let finalMessage = formattedText + "<br>";
+    const seenLanguages = new Set();
 
-    codeBlocks.forEach(({ language, code }) => {
-        finalMessage += createCodeBlock(code, language);
+    // Process code blocks
+    codeBlocks.forEach(({ language, codeBlock }) => {
+        const languageTitle = `<p><b>${language.charAt(0).toUpperCase() + language.slice(1)}:</b></p>`;
+        formattedText = formattedText.replace(languageTitle, '');
+
+        if (!seenLanguages.has(language)) {
+            finalMessage += languageTitle;
+            seenLanguages.add(language);
+        }
+
+        finalMessage += createCodeBlock(codeBlock, language);
     });
 
-    const allLinks = [...new Set([...links, ...extractedLinks])];
-    if (allLinks.length > 0) {
-        finalMessage += '<div class="links-container">';
-        allLinks.forEach(link => {
-            const linkShort = getDomainName(link);
+    // Add links if any
+    if (links && links.length > 0) {
+        links.forEach(link => {
+            const linkShort = getDomainName(link) + "...";
             finalMessage += `<div class="link-box"><a href="${link}" target="_blank">${linkShort}</a></div>`;
         });
-        finalMessage += '</div>';
+        finalMessage += "</div>";
     }
 
     const aiMessageBubble = appendMessage('', "ai");
@@ -422,25 +458,33 @@ function saveConversationHistoryToDB(conversationHistory) {
     }
 
     // Save to DB via API
-    $.ajax({
-        type: "POST",
-        url: "/chat/save_conversation",
-        contentType: "application/json",
-        data: JSON.stringify({
+    fetch('/chat/save_conversation', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
             user_prompt: userPrompt,
             img_base64: '', // If you have image base64, include it here
             ai_response: aiResponse,
         }),
-        success: function (response) {
-            console.log('Conversation saved to DB:', response);
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Conversation saved to DB:', data);
 
             // Clear the localStorage after saving the conversation to DB
             localStorage.removeItem('conversationHistory');
-        },
-        error: function (xhr) {
-            console.error('Error saving conversation to DB:', xhr.responseJSON.error);
-        }
-    });
+        })
+        .catch(error => {
+            console.error('Error saving conversation to DB:', error.message);
+        });
+
 }
 // Hàm để lấy tên miền của liên kết
 function getDomainName(url) {
@@ -506,7 +550,7 @@ function typeWriter(element, text, speed) {
     let typingInterval = setInterval(function () {
         dotCount = (dotCount % 3) + 1; // Chuyển đổi giữa 1 và 3 dấu chấm
         typingIndicator.text('.'.repeat(dotCount));
-    }, 200);
+    }, 300);
 
     setTimeout(function () {
         clearInterval(typingInterval);
@@ -517,36 +561,27 @@ function typeWriter(element, text, speed) {
     }, text.length * speed);
 }
 
-function createCodeBlock(code, language = 'plaintext') {
-    const escapedCode = escapeHtml(code); // Escape HTML để tránh XSS
-
-    // Trả về cấu trúc HTML cho code block với Prism.js syntax highlighting
-    const codeBlock = `
+function createCodeBlock(code, language = 'javascript') {
+    const escapedCode = escapeHtml(code);
+    return `
         <div class="code-block">
-            <div class="code-header">
-                <span class="code-language">${language}</span>
-                <button class="copy-button" onclick="copyToClipboard(\`${escapedCode}\`)">Copy</button>
-            </div>
-            <pre><code class="language-${language}">${escapedCode.trim()}</code></pre>
+            <button class="copy-button">Copy</button>
+            <pre>
+                <code class="language-${language}">${escapedCode.trim()}</code>
+            </pre>
         </div>
     `.trim();
-
-    // Đảm bảo Prism.js highlight code block sau khi đã thêm vào DOM
-    setTimeout(() => {
-        Prism.highlightAll(); // Highlight tất cả code block trên trang
-    }, 0);
-
-    return codeBlock;
 }
 
-
-function copyToClipboard(code) {
+$(document).on('click', '.copy-button', function () {
+    // Tìm phần tử <code> bên trong <pre> và lấy văn bản
+    const code = $(this).siblings('pre').find('code').text();
     navigator.clipboard.writeText(code).then(() => {
-        alert('Code copied to clipboard!');
+
     }).catch(err => {
-        console.error('Failed to copy: ', err);
+
     });
-}
+});
 
 
 function escapeHtml(str) {

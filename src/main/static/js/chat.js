@@ -4,7 +4,6 @@ import { module_users } from './modules/module_profile.js';
 document.addEventListener('DOMContentLoaded', () => {
     module_users.getUser();  // Gọi hàm lấy thông tin user
     let isSending = false;  // Biến trạng thái đang gửi
-    let currentFetchController = null;  // Bộ điều khiển để hủy yêu cầu fetch hiện tại
 
     // Mỗi 100ms sẽ cập nhật lại placeholder
     setInterval(module_chat.animatePlaceholder, 100);
@@ -30,14 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
+    // "Nhập **/list** để xem các tin nhắn khác\n"
     const chatHistory = module_chat.loadChatHistory();
 
     // Kiểm tra nếu lịch sử rỗng hoặc không tồn tại
     if (!chatHistory || chatHistory.length === 0) {
         // Hiển thị started_message
         const started_message = [
-            "Nhập **/list** để xem các tin nhắn khác\n",
+            "Nhập **/new** để tạo tin nhắn mới\n",
+            "Nhập **/new [vai trò AI]** để tạo tin nhắn mới với AI theo ý bạn\n",
             "Nhập **/createtopic [topic]** để tạo chủ đề ghi bài mới\n",
             "Nhập **/takenote Từ vựng: [từ vựng]:[ý nghĩa từ vựng]** để ghi bài mới\n",
             "Nhập **/read ['vi' hoặc 'en'] [từ vựng hoặc đoạn văn]** để AI đọc cho bạn nghe"
@@ -149,11 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
         $('#exampleModal').modal('show');
     });
 
-    $('#send').click(function () {
+    $('#send').click(async function () {
         if (isSending) {
-            if (currentFetchController) {
-                currentFetchController.abort();  // Hủy yêu cầu fetch hiện tại
-            }
             isSending = false;  // Cập nhật trạng thái không còn đang gửi
             document.getElementById("send").classList.remove("sending");  // Cập nhật nút
             document.getElementById("send-icon").src = "../static/img/send.png";  // Khôi phục icon ban đầu
@@ -173,9 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
             module_chat.appendMessage(userInput, "user");
 
             // Nội dung iframe để hiển thị trong phản hồi AI
-            const iframeContent = `
-        <iframe width="955" height="1698" src="https://www.youtube.com/embed/ogq6a_7nk2Y?autoplay=1&controls=0&rel=0" title="Trần Dần chửi thề c.c nói chuyện vô văn hoá" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-    `;
+            const iframeContent = `<iframe width="955" height="1698" src="https://www.youtube.com/embed/ogq6a_7nk2Y?autoplay=1&controls=0&rel=0" title="Trần Dần chửi thề c.c nói chuyện vô văn hoá" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
 
             console.log("Iframe Content: ", iframeContent);
 
@@ -208,55 +203,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         module_chat.clear_val(userInput, imageFile, true)
-
         let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
-        if (userInput === "/new") {
-            $.ajax({
-                url: '/chat/newchat',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    group_name: "newchat",
-                    description: "Tôi đặt tên cho bạn là Liễu Như Yên, tôi đặt cho bạn giới tính là Nữ, tôi đặt tuổi cho bạn là 23, bạn trả lời một cách đáng yêu" // Mô tả mặc định
-                }),
-                success: function (response) {
-                    console.log(response);
-                    location.reload();
-                },
-                error: function (error) {
-                    console.error('Có lỗi xảy ra:', error);
-                },
-                complete: function () {
-                    isSending = false;  // Cập nhật trạng thái sau khi hoàn tất
-                }
-            });
-        }
-        // Kiểm tra nếu userInput bắt đầu với "/new" và có phần mô tả
-        else if (userInput.startsWith("/new")) {
-            const description = userInput.slice(5).trim();
-            if (description) {
-                $.ajax({
-                    url: '/chat/newchat',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        group_name: "newchat", // Tên nhóm trò chuyện
-                        description: description // Mô tả nhóm từ người dùng
-                    }),
-                    success: function (response) {
-                        console.log(response);
-                        location.reload();
-                    },
-                    error: function (error) {
-                        console.error('Có lỗi xảy ra:', error);
-                    },
-                    complete: function () {
-                        isSending = false;  // Cập nhật trạng thái sau khi hoàn tất
-                    }
-                });
-            } else {
+
+        if (userInput.startsWith("/new")) {
+            const description = userInput === "/new"
+                ? "Tôi đặt tên cho bạn là Liễu Như Yên, tôi đặt cho bạn giới tính là Nữ, tôi đặt tuổi cho bạn là 23, bạn trả lời một cách đáng yêu"
+                : userInput.slice(5).trim();
+
+            if (!description) {
                 console.error("Mô tả nhóm không hợp lệ");
+                return;
             }
+
+            try {
+                const response = await fetch('/chat/newchat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ group_name: "newchat", description }),
+                });
+                if (!response.ok) throw new Error("Có lỗi xảy ra khi tạo nhóm mới.");
+                console.log(await response.json());
+                location.reload();
+            } catch (error) {
+                console.error(error.message);
+            } finally {
+                isSending = false;
+            }
+            return;
         }
         else if (userInput.startsWith("/takenote")) {
             const noidungbai = userInput.slice(9).trim();
@@ -355,152 +328,170 @@ document.addEventListener('DOMContentLoaded', () => {
         else {
             if (userInput || imageFile) {
                 const formattedUserInput = module_chat.formatAndEscapeMessage4User(userInput);
-                module_chat.appendMessage(formattedUserInput, "user");
 
-                // Save the user input into the conversation history
-                conversationHistory.push({ sender: 'user', message: formattedUserInput });
+                // Nếu tin nhắn người dùng không rỗng, hiển thị tin nhắn
+                if (formattedUserInput.trim() !== "") {
+                    module_chat.appendMessage(formattedUserInput, "user");
 
-                // Save the updated conversation history to localStorage
-                localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+                    // Lưu tin nhắn người dùng vào lịch sử cuộc trò chuyện
+                    conversationHistory.push({ sender: 'user', message: formattedUserInput });
+
+                    // Lưu lịch sử cuộc trò chuyện vào localStorage
+                    localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+                }
 
                 if (imageFile) {
                     const reader = new FileReader();
+
+                    // Đọc tệp hình ảnh dưới dạng DataURL
                     reader.onload = function (event) {
                         const imgSrc = event.target.result;
+
+                        // Hiển thị hình ảnh trong UI trước
                         module_chat.appendMessage(imgSrc, "user");
 
+                        // Chuẩn bị FormData để gửi đến server
                         const formData = new FormData();
                         formData.append('image_file', imageFile);
                         formData.append('prompt', userInput);
 
-                        currentFetchController = new AbortController();  // Tạo AbortController mới cho mỗi yêu cầu
+                        // Gửi yêu cầu POST bằng fetch
                         fetch('/chat/send-image', {
                             method: 'POST',
                             body: formData,
-                            signal: currentFetchController.signal  // Thêm signal vào fetch để hỗ trợ hủy
                         })
-                            .then(response => response.json())
-                            .then(data => {
-                                module_chat.handleResponse((data));
-                                // module_chat.englishPattern(data);
-                                // console.log(data)
-                            })
-                            .catch(error => {
-                                if (error.name === 'AbortError') {
-                                    console.log('Yêu cầu đã bị hủy');
-                                } else {
-                                    console.error('Error sending image and prompt:', error);
-                                    alert('Error sending image and prompt');
+                            .then((response) => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
                                 }
+                                return response.json();
+                            })
+                            .then((data) => {
+                                // Xử lý phản hồi từ server
+                                module_chat.handleResponse(data);
+                            })
+                            .catch((error) => {
+                                console.error('Error sending image and prompt:', error);
+                                // Có thể thêm logic xử lý lỗi nếu cần
                             })
                             .finally(() => {
+                                // Cập nhật trạng thái khi hoàn thành
                                 isSending = false;
-
                             });
                     };
+
+                    // Đọc hình ảnh
                     reader.readAsDataURL(imageFile);
                 } else {
                     // Kiểm tra nếu userInput chứa từ khóa
                     if (module_chat.containsKeyword(userInput)) {
-                        var settings = {
-                            "url": "https://google.serper.dev/search",
-                            "method": "POST",
-                            "timeout": 0,
-                            "headers": {
+                        const searchSettings = {
+                            url: "https://google.serper.dev/search",
+                            method: "POST",
+                            headers: {
                                 "X-API-KEY": "fece0945a251708eb4858da7303a24ba2c4b73eb",
                                 "Content-Type": "application/json"
                             },
-                            "data": JSON.stringify({
-                                "q": userInput,  // Sử dụng userInput trực tiếp
-                                "gl": "vn", // Khu vực VN
-                                "num": 2
+                            body: JSON.stringify({
+                                q: userInput,  // Sử dụng userInput trực tiếp
+                                gl: "vn", // Khu vực VN
+                                num: 6
                             }),
                         };
 
                         // Thực hiện yêu cầu tìm kiếm
-                        $.ajax(settings).done(function (response) {
-                            // Extract các link tìm được từ kết quả trả về
-                            let links = [];
-                            if (response && response.organic) {
-                                links = response.organic.map(item => item.link);
-                            }
-
-                            currentFetchController = new AbortController();
-                            $.ajax({
-                                type: "POST",
-                                url: "/chat/send",
-                                contentType: "application/json",
-                                data: JSON.stringify({ user_input: userInput }),
-                                signal: currentFetchController.signal,
-                                success: function (data) {
-                                    // Xử lý phản hồi AI với các liên kết
-                                    module_chat.handleResponse(data, links); // Gọi handleResponse với các liên kết tìm được
-
-                                    // Lưu AI response và links vào conversation history
-                                    let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
-
-                                    // Đảm bảo responseMessage đã được cập nhật
-                                    let aiResponse = data.response || '';
-                                    if (links && links.length > 0) {
-                                        // Thêm các liên kết vào aiResponse nếu có
-                                        aiResponse += '\n' + links + '\n';
-                                    }
-
-                                    // Lưu phản hồi AI vào history
-                                    conversationHistory.push({ sender: 'ai', message: aiResponse });
-
-                                    // Lưu updated conversation history vào localStorage
-                                    localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
-
-                                    // Lưu conversation history vào DB
-                                    module_chat.saveConversationHistoryToDB(conversationHistory);
-                                },
-                                error: function (xhr) {
-                                    module_chat.handleResponse({ response: xhr.responseJSON.error + '' }, []);
-                                },
-                                complete: function () {
-                                    isSending = false;
+                        fetch(searchSettings.url, {
+                            method: searchSettings.method,
+                            headers: searchSettings.headers,
+                            body: searchSettings.body,
+                        })
+                            .then((response) => {
+                                if (!response.ok) {
+                                    throw new Error("Tìm kiếm thất bại.");
                                 }
-                            });
-                        }).fail(function () {
-                            console.error('Tìm kiếm thất bại.');
-                        });
-                    }
-                    else {
-                        currentFetchController = new AbortController();
-                        $.ajax({
-                            type: "POST",
-                            url: "/chat/send",
-                            contentType: "application/json",
-                            data: JSON.stringify({ user_input: userInput }),
-                            signal: currentFetchController.signal,  // Đảm bảo fetchController được sử dụng đúng.
-                            success: function (data) {
-                                // Kiểm tra phản hồi và xử lý nó
-                                module_chat.handleResponse(data);
-
-                                // Kiểm tra nếu response có dữ liệu hợp lệ (giả sử là 'data.response')
-                                if (data && data.response) {
-                                    // Trích xuất thông tin từ phản hồi AI
-                                    const aiResponse = data.response;
-                                    // Lưu phản hồi vào conversation history
-                                    let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
-                                    conversationHistory.push({ sender: 'ai', message: aiResponse });
-                                    localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
-                                    module_chat.saveConversationHistoryToDB(conversationHistory);
-
-                                    console.log(aiResponse);
-                                } else {
-                                    console.error('Không có phản hồi hợp lệ từ AI');
+                                return response.json();
+                            })
+                            .then((response) => {
+                                // Extract các link tìm được từ kết quả trả về
+                                let links = [];
+                                if (response && response.organic) {
+                                    links = response.organic.map(item => item.link);
                                 }
-                            },
-                            error: function (xhr) {
-                                // Nếu có lỗi, xử lý và hiển thị thông báo
-                                module_chat.handleResponse({ response: xhr.responseJSON.error + '' });
-                            },
-                            complete: function () {
-                                // Cập nhật trạng thái khi hoàn thành
+
+                                return fetch("/chat/send", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({ user_input: userInput }),
+                                })
+                                    .then((data) => data.json())
+                                    .then((data) => {
+                                        // Xử lý phản hồi AI với các liên kết
+                                        module_chat.handleResponse(data, links); // Gọi handleResponse với các liên kết tìm được
+
+                                        // Lưu AI response và links vào conversation history
+                                        let conversationHistory = JSON.parse(localStorage.getItem("conversationHistory")) || [];
+
+                                        // Đảm bảo responseMessage đã được cập nhật
+                                        let aiResponse = data.response || '';
+                                        if (links && links.length > 0) {
+                                            // Thêm các liên kết vào aiResponse nếu có
+                                            aiResponse += '\n' + links + '\n';
+                                        }
+
+                                        // Lưu phản hồi AI vào history
+                                        conversationHistory.push({ sender: "ai", message: aiResponse });
+
+                                        // Lưu updated conversation history vào localStorage
+                                        localStorage.setItem("conversationHistory", JSON.stringify(conversationHistory));
+
+                                        // Lưu conversation history vào DB
+                                        module_chat.saveConversationHistoryToDB(conversationHistory);
+                                    });
+                            })
+                            .catch((error) => {
+                                console.error(error.message || "Có lỗi xảy ra.");
+                            })
+                            .finally(() => {
                                 isSending = false;
+                            });
+                    } else {
+                        fetch("/chat/send", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ user_input: userInput }),
+                        }).then((response) => {
+                            if (!response.ok) {
+                                throw new Error("Yêu cầu gửi thất bại.");
                             }
+                            return response.json();
+                        }).then((data) => {
+                            // Kiểm tra phản hồi và xử lý nó
+                            module_chat.handleResponse(data);
+
+                            // Kiểm tra nếu response có dữ liệu hợp lệ (giả sử là 'data.response')
+                            if (data && data.response) {
+                                // Trích xuất thông tin từ phản hồi AI
+                                const aiResponse = data.response;
+                                // Lưu phản hồi vào conversation history
+                                let conversationHistory = JSON.parse(localStorage.getItem("conversationHistory")) || [];
+                                conversationHistory.push({ sender: "ai", message: aiResponse });
+                                localStorage.setItem("conversationHistory", JSON.stringify(conversationHistory));
+                                module_chat.saveConversationHistoryToDB(conversationHistory);
+
+                                console.log(aiResponse);
+                            } else {
+                                console.error("Không có phản hồi hợp lệ từ AI");
+                            }
+                        }).catch((error) => {
+                            // Nếu có lỗi, xử lý và hiển thị thông báo
+                            console.error(error.message || "Có lỗi xảy ra.");
+                            module_chat.handleResponse({ response: error.message || "Error occurred." });
+                        }).finally(() => {
+                            isSending = false;
                         });
 
                     }

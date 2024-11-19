@@ -61,6 +61,10 @@ REM Cài đặt và cập nhật các gói từ requirements.txt
 echo Tiến hành tải packages trong requirements.txt...
 pip install -U -r requirements.txt || echo Lỗi khi tải packages
 
+REM Cài đặt localforage
+echo Tiến hành tải packages localforage...
+npm install localforage
+
 REM Xuất danh sách các gói đã cài đặt ra requirements.txt
 echo Kiểm tra và xuất ra lại requirements.txt...
 pip freeze > requirements.txt

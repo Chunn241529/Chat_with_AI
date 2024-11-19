@@ -264,7 +264,7 @@ def save_image_to_server(image_file, userId):
             os.makedirs(uploads_folder)
 
         image_path = os.path.join(uploads_folder, filename)
-        image_file.save(image_path + f"_user-{userId}")
+        image_file.save(image_path)
         return image_path
     return None
 
