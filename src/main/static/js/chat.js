@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (userInput.startsWith("/new")) {
             const description = userInput === "/new"
-                ? "Tôi đặt tên cho bạn là Liễu Như Yên, tôi đặt cho bạn giới tính là Nữ, tôi đặt tuổi cho bạn là 23, bạn trả lời một cách đáng yêu"
+                ? "Tôi đặt tên cho bạn là Liễu Như Yên, tôi đặt cho bạn giới tính là Nữ, bạn trả lời một cách đáng yêu"
                 : userInput.slice(5).trim();
 
             if (!description) {

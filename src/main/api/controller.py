@@ -7,6 +7,7 @@ from flask import (
     url_for,
     session,
 )
+from api.modules.database import *
 
 app = Blueprint("/", __name__)
 
@@ -26,13 +27,6 @@ def getFlagBanned(urlR):
     # Kiểm tra nếu tài khoản bị cấm
     if user and user[0] == 1:
         return render_template(urlR)  # Trả về trang "banned.html"
-
-
-# Hàm kết nối đến cơ sở dữ liệu
-def get_db_connection():
-    conn = sqlite3.connect("chatbot.db")
-    conn.row_factory = sqlite3.Row
-    return conn
 
 
 def login_required(f):

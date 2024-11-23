@@ -7,10 +7,10 @@ from flask import Flask, render_template, jsonify, redirect
 from flask_session import Session
 import requests
 import schedule
-from api.chat import app as chat_app
-from api.authentication import app as auth_app
+from api.api_chat import app as chat_app
+from api.api_authentication import app as auth_app
 from api.controller import app as app
-from api.english import app as en_app
+from api.api_english import app as en_app
 from api.modules.sendmail import app as mail_app
 import secrets
 

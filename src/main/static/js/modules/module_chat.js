@@ -411,38 +411,33 @@ function extractCodeAndText(responseMessage) {
 }
 
 function handleResponse(data, links = []) {
-    const responseMessage = data.response;
-    const { text, codeBlocks } = extractCodeAndText(responseMessage);
+    const responseMessage = data.response; // Lấy phản hồi đã được server format
 
-    let formattedText = formatAndEscapeMessage(text);
-    let finalMessage = formattedText + "<br>";
-    const seenLanguages = new Set();
+    // Không cần xử lý lại Markdown hay code block, vì server đã format HTML sẵn
+    let finalMessage = responseMessage;
 
-    // Process code blocks
-    codeBlocks.forEach(({ language, codeBlock }) => {
-        const languageTitle = `<p><b>${language.charAt(0).toUpperCase() + language.slice(1)}:</b></p>`;
-        formattedText = formattedText.replace(languageTitle, '');
-
-        if (!seenLanguages.has(language)) {
-            finalMessage += languageTitle;
-            seenLanguages.add(language);
-        }
-
-        finalMessage += createCodeBlock(codeBlock, language);
-    });
-
-    // Add links if any
+    // Thêm liên kết (nếu có)
     if (links && links.length > 0) {
         links.forEach(link => {
             const linkShort = getDomainName(link) + "...";
             finalMessage += `<div class="link-box"><a href="${link}" target="_blank">${linkShort}</a></div>`;
         });
-        finalMessage += "</div>";
     }
 
+    // Hiển thị tin nhắn đã được xử lý (gồm cả HTML và code block)
     const aiMessageBubble = appendMessage('', "ai");
     typeWriter(aiMessageBubble, finalMessage, 4);
     $('#response').scrollTop($('#response')[0].scrollHeight);
+
+    // Thêm chức năng sao chép
+    document.querySelectorAll('.copy-button').forEach(button => {
+        button.addEventListener('click', function () {
+            const codeBlock = this.closest('.code-block').querySelector('code').innerText;
+            navigator.clipboard.writeText(codeBlock).then(() => {
+                alert('Copied to clipboard!');
+            });
+        });
+    });
 }
 
 function saveConversationHistoryToDB(conversationHistory) {

@@ -52,6 +52,8 @@ IF NOT EXIST requirements.txt (
         echo pyttsx3
         echo gTTS
         echo schedule
+        echo markdown
+        echo pygments
     ) > requirements.txt
 ) ELSE (
     echo requirements.txt already exists.

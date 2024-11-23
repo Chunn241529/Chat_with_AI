@@ -6,7 +6,12 @@ from dotenv import load_dotenv
 from flask import Blueprint, request, jsonify, session, url_for
 import google.generativeai as genai
 from werkzeug.utils import secure_filename
-
+from pygments import highlight
+from pygments.lexers import guess_lexer
+from pygments.formatters import HtmlFormatter
+import markdown
+import re
+from api.modules.database import *
 
 # Tải biến môi trường từ file .env
 load_dotenv()
@@ -27,13 +32,6 @@ def img_generate():
     image_path = __txt2img__.run()  # Giả sử run() trả về tên tệp hình ảnh
     image_filename = os.path.basename(image_path)  # Lấy tên tệp hình ảnh
     return url_for("static", filename=f"output/{image_filename}")  # Tạo đường dẫn URL
-
-
-# Hàm kết nối đến cơ sở dữ liệu
-def get_db_connection():
-    conn = sqlite3.connect("chatbot.db")
-    conn.row_factory = sqlite3.Row
-    return conn
 
 
 # Hàm lấy danh sách nhóm từ cơ sở dữ liệu
@@ -111,6 +109,61 @@ def save_conversation_to_db(group_id, user_prompt, img_base64, ai_response):
     conn.close()
 
 
+def format_response(ai_response):
+    """
+    Format AI response with Markdown and syntax highlighting for code blocks.
+    """
+    # Step 1: Process Markdown (convert Markdown to HTML)
+    formatted_response = markdown.markdown(ai_response)
+
+    # Step 2: Replace bold with custom color
+    formatted_response = re.sub(
+        r"(\*\*|__)(.*?)\1", r'<b style="color:#ce2479;">\2</b>', formatted_response
+    )
+
+    # Step 3: Replace italic with HTML <i> tag, but exclude code blocks
+    formatted_response = re.sub(r"(\*|_)(.*?)\1", r"<i>\2</i>", formatted_response)
+
+    # Step 4: Handle code blocks
+    def highlight_code_blocks(match):
+        code_block = match.group(1)  # Get the code inside the block
+        lexer = guess_lexer(code_block)  # Automatically detect the language of the code
+        formatter = HtmlFormatter(
+            cssclass="source", linenos=False
+        )  # Do not show line numbers
+        highlighted_code = highlight(code_block, lexer, formatter)
+
+        # Return the highlighted code wrapped with a div and a copy button
+        return f"""
+        <div class="code-block">
+            <button class="copy-button" onclick="copyToClipboard(this)">Copy</button>
+            <pre><code class="language-{lexer.name}">{highlighted_code}</code></pre>
+        </div>
+        """
+
+    # Step 5: Regex to match both <p><code> blocks and ``` code blocks
+    code_block_pattern = re.compile(r"(<p><code>.*?</code></p>|```(.*?)```)", re.DOTALL)
+
+    # Perform regex substitution to highlight code blocks
+    formatted_response = re.sub(
+        code_block_pattern,
+        lambda match: highlight_code_blocks(match),
+        formatted_response,
+    )
+
+    # Step 6: Replace <p><code> and </code></p> tags correctly
+    formatted_response = re.sub(
+        r"<p><code>(.*?)</code></p>", r"<pre><code>\1</code></pre>", formatted_response
+    )
+
+    # Final Step: Clean any unnecessary tags like <p>, <i> from code blocks and HTML content
+    formatted_response = re.sub(
+        r"<p>|</p>", "", formatted_response
+    )  # Remove <p> tags entirely
+
+    return formatted_response
+
+
 def chat_with_ai(user_input):
     global current_group_id
 
@@ -119,8 +172,9 @@ def chat_with_ai(user_input):
 
     # Nếu không tìm thấy vai trò, sử dụng mô tả mặc định
     if not role_description:
-        role_descriptions = [
-            "Bạn là giáo viên tiếng Anh, dạy tôi bằng cả tiếng Việt và tiếng Anh. Cung cấp tài liệu chi tiết theo định dạng sau:\n"
+        role_descriptions = (
+            "Bạn là giáo viên tiếng Anh, dạy tôi bằng cả tiếng Việt và tiếng Anh. "
+            "Cung cấp tài liệu chi tiết theo định dạng sau:\n"
             "Chủ đề: [topic]\n"
             "Từ vựng:\n"
             "[từ vựng]: [ý nghĩa]\n"
@@ -128,8 +182,7 @@ def chat_with_ai(user_input):
             "Person A: ...\n"
             "Person B: ...\n"
             "Nếu tôi giao tiếp bình thường, bạn không cần theo format này trừ khi tôi yêu cầu."
-        ]
-
+        )
     else:
         role_descriptions = f"{role_description['description']}"
 
@@ -145,13 +198,64 @@ def chat_with_ai(user_input):
     )
     ai_response = response.text.strip()
 
-    full_response = f"{ai_response}"
-    conversation_context.append(f"AI: {full_response}")
+    # Apply formatting to the response
+    formatted_response = format_response(ai_response)
 
-    # Save the conversation to the database
-    # save_conversation_to_db(current_group_id, user_input, None, full_response)
+    conversation_context.append(f"AI: {formatted_response}")
+    return formatted_response
 
-    return full_response
+
+# Hàm set_group đã được sửa lại để nhận tham số group_id
+def set_group(group_id):
+    global current_group_id
+    if group_id:
+        current_group_id = group_id
+        print(current_group_id)
+        return {"message": f"Đã chọn nhóm trò chuyện ID: {group_id}"}, 200
+    else:
+        return {
+            "error": "ID nhóm trò chuyện không được cung cấp."
+        }, 400  # Thay đổi mã lỗi thành 400
+
+
+def create_dataset(datasets_name, description):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Kiểm tra tên dataset có tồn tại không
+        suffix = 1
+        original_name = datasets_name
+
+        # Kiểm tra trong cơ sở dữ liệu để đảm bảo tên duy nhất
+        while cursor.execute(
+            "SELECT 1 FROM datasets WHERE datasets_name = ?", (datasets_name,)
+        ).fetchone():
+            datasets_name = f"{original_name}{suffix}"
+            suffix += 1
+
+        # Thực hiện câu lệnh SQL để chèn dữ liệu vào bảng
+        cursor.execute(
+            """
+            INSERT INTO datasets (datasets_name, description)
+            VALUES (?, ?)
+            """,
+            (datasets_name, description),  # Thêm dữ liệu vào bảng
+        )
+
+        conn.commit()  # Lưu thay đổi vào cơ sở dữ liệu
+
+        # Lấy id của bản ghi mới tạo
+        new_id = cursor.lastrowid
+
+        return {"message": "Tạo dataset thành công.", "status_code": 200, "id": new_id}
+
+    except sqlite3.Error as e:
+        conn.rollback()  # Rollback trong trường hợp có lỗi
+        return {"error": f"Lỗi khi tạo dataset: {e}", "status_code": 500}
+
+    finally:
+        conn.close()
 
 
 @app.route("/get_groups", methods=["GET"])
@@ -324,9 +428,6 @@ def chat():
     if user_id is None:
         return jsonify({"error": "Người dùng chưa đăng nhập."}), 401
 
-    if user_input.strip().lower() == "/genimg":
-        return jsonify({"response": "Mở cửa sổ tạo hình ảnh..."})
-
     # Nếu chưa chọn nhóm, tạo một nhóm mặc định với user_id
     if current_group_id is None:
         current_group_id = create_group(user_id, "bình thường", None)
@@ -334,59 +435,6 @@ def chat():
     # Nếu đã chọn nhóm hoặc tạo nhóm mới, tiếp tục với tin nhắn người dùng
     ai_response = chat_with_ai(user_input)
     return jsonify({"response": ai_response})
-
-
-# Hàm set_group đã được sửa lại để nhận tham số group_id
-def set_group(group_id):
-    global current_group_id
-    if group_id:
-        current_group_id = group_id
-        print(current_group_id)
-        return {"message": f"Đã chọn nhóm trò chuyện ID: {group_id}"}, 200
-    else:
-        return {
-            "error": "ID nhóm trò chuyện không được cung cấp."
-        }, 400  # Thay đổi mã lỗi thành 400
-
-
-def create_dataset(datasets_name, description):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        # Kiểm tra tên dataset có tồn tại không
-        suffix = 1
-        original_name = datasets_name
-
-        # Kiểm tra trong cơ sở dữ liệu để đảm bảo tên duy nhất
-        while cursor.execute(
-            "SELECT 1 FROM datasets WHERE datasets_name = ?", (datasets_name,)
-        ).fetchone():
-            datasets_name = f"{original_name}{suffix}"
-            suffix += 1
-
-        # Thực hiện câu lệnh SQL để chèn dữ liệu vào bảng
-        cursor.execute(
-            """
-            INSERT INTO datasets (datasets_name, description)
-            VALUES (?, ?)
-            """,
-            (datasets_name, description),  # Thêm dữ liệu vào bảng
-        )
-
-        conn.commit()  # Lưu thay đổi vào cơ sở dữ liệu
-
-        # Lấy id của bản ghi mới tạo
-        new_id = cursor.lastrowid
-
-        return {"message": "Tạo dataset thành công.", "status_code": 200, "id": new_id}
-
-    except sqlite3.Error as e:
-        conn.rollback()  # Rollback trong trường hợp có lỗi
-        return {"error": f"Lỗi khi tạo dataset: {e}", "status_code": 500}
-
-    finally:
-        conn.close()
 
 
 @app.route("/newchat", methods=["POST"])

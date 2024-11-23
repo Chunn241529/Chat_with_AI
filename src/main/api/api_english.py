@@ -6,6 +6,7 @@ import google.generativeai as genai
 from gtts import gTTS
 import os
 import uuid
+from api.modules.database import *
 
 # Tải biến môi trường từ file .env
 load_dotenv()
@@ -19,14 +20,6 @@ app = Blueprint("en", __name__)
 current_topic_id = None
 conversation_context = []
 current_group_id = None  # Biến lưu nhóm trò chuyện hiện tại của người dùng
-
-
-# Hàm kết nối đến cơ sở dữ liệu
-def get_db_connection():
-    conn = sqlite3.connect("chatbot.db")
-    conn.row_factory = sqlite3.Row
-    return conn
-
 
 @app.route("/read", methods=["POST"])
 def text_to_speech():

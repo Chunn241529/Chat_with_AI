@@ -413,62 +413,60 @@ body::-webkit-scrollbar {
     }
 }
 
+/* Cải thiện giao diện của code block */
 .code-block {
+    position: relative;
     background-color: #f4f4f4;
-    border-radius: 4px;
-    margin: 15px 0;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.code-header {
-    background-color: #f4f4f4;
-    /* Đồng bộ màu với code-block */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15px;
-    border-bottom: 1px solid #ddd;
-}
-
-.code-language {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 14px;
-    font-weight: bold;
-    color: #555;
-    margin: 0;
-    text-align: left;
-    display: inline-block;
-}
-
-.copy-button {
-    background-color: #4CAF50;
-    border: none;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 3px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.copy-button:hover {
-    background-color: #45a049;
-}
-
-.code-block pre {
-    margin: 0;
-    padding: 15px;
-    overflow-x: auto;
-    font-size: 13px;
-}
-
-.code-block code {
-    font-family: 'Courier New', Courier, monospace;
+    padding: 1em;
+    border-radius: 5px;
+    margin-bottom: 1em;
     font-size: 14px;
     line-height: 1.5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Thêm hiệu ứng bóng để code block nổi bật hơn */
 }
 
+/* Nút copy */
+button.copy-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 3px;
+    z-index: 10;
+    /* Đảm bảo nút luôn nằm trên code block */
+}
+
+/* Nút copy khi hover */
+button.copy-button:hover {
+    background-color: #0056b3;
+}
+
+/* Hiển thị phần mã code */
+pre {
+    background: #282828;
+    /* Màu nền của code block */
+    padding: 10px;
+    border-radius: 5px;
+    color: #f8f8f2;
+    font-size: 14px;
+    white-space: pre-wrap;
+    /* Cho phép dòng dài bị bẻ xuống */
+    word-wrap: break-word;
+    /* Đảm bảo không bị tràn */
+    overflow-x: auto;
+    /* Cho phép cuộn ngang */
+}
+
+/* Thiết lập font chữ cho code */
+code {
+    font-family: Consolas, Monaco, monospace;
+}
 
 .modal-full {
     max-width: 80%;

@@ -2,6 +2,6 @@
 .vscode/
 flask_session/
 chatbot.db
-scr/main/.env
+scr\main\.env
 src\main\static\uploads
 commit_git.bat

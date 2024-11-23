@@ -11,15 +11,9 @@ from flask import (
 )
 import sqlite3
 import bcrypt
+from api.modules.database import *
 
 app = Blueprint("auth", __name__)
-
-
-# Hàm kết nối đến cơ sở dữ liệu
-def get_db_connection():
-    conn = sqlite3.connect("chatbot.db")
-    conn.row_factory = sqlite3.Row
-    return conn
 
 
 # Lấy tất cả người dùng
