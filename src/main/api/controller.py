@@ -1,5 +1,4 @@
 from functools import wraps
-import sqlite3
 from flask import (
     Blueprint,
     render_template,

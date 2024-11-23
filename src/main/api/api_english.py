@@ -1,5 +1,4 @@
 import os
-import sqlite3
 from dotenv import load_dotenv
 from flask import Blueprint, request, jsonify, session
 import google.generativeai as genai
