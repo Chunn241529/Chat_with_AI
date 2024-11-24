@@ -296,26 +296,8 @@ function loadChatHistory() {
 
                         // Lưu trữ phản hồi AI
                         let aiResponse = item.ai_response;
-                        const aiMessageBubble = appendMessage("Đang load tin nhắn...", "ai");
-
-                        // Tách text và code blocks từ aiResponse
-                        const { text, codeBlocks } = extractCodeAndText(aiResponse);
-                        let formattedText = formatAndEscapeMessage(text);
-                        let finalMessage = formattedText + "<br>";
-
-                        // Xử lý các code blocks nếu có
-                        const seenLanguages = new Set();
-                        codeBlocks.forEach(({ language, codeBlock }) => {
-                            const languageTitle = `<p><b>${language.charAt(0).toUpperCase() + language.slice(1)}:</b></p>`;
-                            formattedText = formattedText.replace(languageTitle, '');
-
-                            if (!seenLanguages.has(language)) {
-                                finalMessage += languageTitle;
-                                seenLanguages.add(language);
-                            }
-
-                            finalMessage += createCodeBlock(codeBlock, language);
-                        });
+                        const aiMessageBubble = appendMessage(aiResponse, "ai");
+                        let finalMessage = aiResponse + "<br>";
 
                         // Tìm và thêm các liên kết từ aiResponse
                         const linkRegex = /(https?:\/\/[^\s,]+)/g;

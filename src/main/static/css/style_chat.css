@@ -1,11 +1,11 @@
 .--dark-theme {
-    --chat-background: #1d1d1df2;
-    --chat-panel-background: #181717;
-    --chat-bubble-background: #292929;
-    --chat-add-button-background: #3d3d3d;
+    --chat-background: #fffffff2;
+    --chat-panel-background: #ececec;
+    --chat-bubble-background: #ececec;
+    --chat-add-button-background: #ebebeb;
     --chat-send-button-background: #ce2479;
-    --chat-text-color: #b9b9b9;
-    --chat-options-svg: #0c0c0c;
+    --chat-text-color: #000000;
+    --chat-options-svg: #d6d6d6;
 }
 
 body {
@@ -42,37 +42,6 @@ body::-webkit-scrollbar {
     text-overflow: ellipsis;
     display: inline-block;
 }
-
-#menubar {
-    flex: 2;
-    background: #242424;
-    padding: 10px;
-    box-sizing: border-box;
-    color: white;
-}
-
-#menubar ul {
-    list-style-type: none;
-    padding: 10px;
-    margin: 0;
-}
-
-#menubar li {
-    padding: 10px 20px;
-    margin: 10px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-family: sans-serif;
-}
-
-#menubar li:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-#menubar li:active {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
 
 #chat_container {
     flex: 10;
@@ -306,6 +275,15 @@ body::-webkit-scrollbar {
     justify-content: center;
 }
 
+/* Ẩn placeholder khi input được focus */
+#chat .chat__conversation-panel__input:focus::placeholder {
+    opacity: 0; /* Ẩn placeholder khi focus */
+}
+
+/* Đảm bảo placeholder không bị ẩn khi không focus */
+#chat .chat__conversation-panel__input::placeholder {
+    opacity: 1; /* Đảm bảo placeholder hiển thị khi không focus */
+}
 
 #chat .chat__conversation-panel__button {
     background-color: #6b33c2;
@@ -541,7 +519,7 @@ img {
 
 /* Style cho từng box link */
 .link-box {
-    background-color: #181717;
+    background: var(--chat-background);
     border-radius: 5px;
     padding: 8px 12px;
     text-align: center;

@@ -10,6 +10,7 @@ from flask import (
 import sqlite3
 import bcrypt
 from api.modules.database import *
+from api.modules.formatted_response import *
 
 app = Blueprint("auth", __name__)
 
@@ -187,7 +188,10 @@ def load_chat_history():
         ).fetchall()
 
         if not groups:
-            return jsonify({"message": "Không có lịch sử trò chuyện nào có sẵn"}), 200
+            return (
+                format_response({"message": "Không có lịch sử trò chuyện nào có sẵn"}),
+                200,
+            )
 
         # Lấy lịch sử trò chuyện từ conversation_history cho tất cả các group_id
         conversation_history = []
@@ -205,12 +209,14 @@ def load_chat_history():
                 (group_id,),
             ).fetchall()
 
-            # Chuyển đổi lịch sử trò chuyện thành định dạng JSON
+            # Chuyển đổi lịch sử trò chuyện thành định dạng JSON và áp dụng formatted_response
             group_history = [
                 {
                     "input_text": row["input_text"],
                     "img_base64": row["img_base64"],
-                    "ai_response": row["ai_response"],
+                    "ai_response": format_response(
+                        row["ai_response"]
+                    ),  # Áp dụng định dạng
                     "created_at": row["created_at"],
                 }
                 for row in conversation_rows

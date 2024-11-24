@@ -20,6 +20,7 @@ current_topic_id = None
 conversation_context = []
 current_group_id = None  # Biến lưu nhóm trò chuyện hiện tại của người dùng
 
+
 @app.route("/read", methods=["POST"])
 def text_to_speech():
     # Lấy user_id từ session trong phạm vi của request
@@ -45,7 +46,7 @@ def text_to_speech():
     # Tạo file âm thanh từ văn bản
     try:
         # Tạo đối tượng gTTS
-        tts = gTTS(text=text, lang=lang)
+        tts = gTTS(text=text, lang=lang, slow=False)
 
         # Tạo tên file âm thanh duy nhất và lưu vào thư mục static/uploads/audio/user/
         filename = f"audio_userId-{user_id}_{uuid.uuid4()}.mp3"
