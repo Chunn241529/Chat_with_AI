@@ -4,3 +4,6 @@ flask_session/
 chatbot.db
 commit_git.bat
 src/main/.env
+/src/main/api/modules/__pycache__
+/src/main/api/__pycache__
+/src/main/static/uploads
