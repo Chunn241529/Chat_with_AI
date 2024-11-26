@@ -394,8 +394,6 @@ function extractCodeAndText(responseMessage) {
 
 function handleResponse(data, links = []) {
     const responseMessage = data.response; // Lấy phản hồi đã được server format
-
-    // Không cần xử lý lại Markdown hay code block, vì server đã format HTML sẵn
     let finalMessage = responseMessage;
 
     // Thêm liên kết (nếu có)
@@ -406,21 +404,51 @@ function handleResponse(data, links = []) {
         });
     }
 
+    // Xử lý lệnh đọc trước khi hiển thị
+    const { processedMessage, shouldRead, lang, content } = handleReadCommand(finalMessage);
+    finalMessage = processedMessage;
+
     // Hiển thị tin nhắn đã được xử lý (gồm cả HTML và code block)
     const aiMessageBubble = appendMessage('', "ai");
     typeWriter(aiMessageBubble, finalMessage, 4);
     $('#response').scrollTop($('#response')[0].scrollHeight);
 
-    // Thêm chức năng sao chép
-    document.querySelectorAll('.copy-button').forEach(button => {
-        button.addEventListener('click', function () {
-            const codeBlock = this.closest('.code-block').querySelector('code').innerText;
-            navigator.clipboard.writeText(codeBlock).then(() => {
-                alert('Copied to clipboard!');
-            });
-        });
-    });
+    // Nếu có lệnh đọc, thực hiện sau khi hiển thị tin nhắn
+    if (shouldRead) {
+        module_chat.readEnglish(lang, content);
+    }
 }
+
+function handleReadCommand(aiResponse) {
+    let shouldRead = false;
+    let lang = '';
+    let content = '';
+
+    // Kiểm tra nếu aiResponse chứa "/read"
+    if (aiResponse.includes("/read")) {
+        // Tìm vị trí của "/read" trong chuỗi
+        const readIndex = aiResponse.indexOf("/read");
+        // Lấy phần chuỗi từ "/read" trở đi
+        const readCommand = aiResponse.slice(readIndex);
+        // Tách lệnh đọc và ngôn ngữ ra
+        const parts = readCommand.slice(5).trim().split(" ");  // Tách chuỗi sau "/read" theo dấu cách
+        lang = parts[0];  // Ngôn ngữ sẽ là phần đầu tiên
+        content = parts.slice(1).join(" ");  // Ghép tất cả phần còn lại thành nội dung bài đọc
+
+        // Kiểm tra xem có đủ thông tin không
+        if (lang && content) {
+            shouldRead = true;        
+        }
+    }
+
+    return {
+        processedMessage: aiResponse,
+        shouldRead: shouldRead,
+        lang: lang,
+        content: content
+    };
+}
+
 
 function saveConversationHistoryToDB(conversationHistory) {
     const userPrompt = conversationHistory.filter(item => item.sender === 'user').map(item => item.message).join(" ");

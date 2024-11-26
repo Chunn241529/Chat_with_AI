@@ -204,11 +204,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         module_chat.clear_val(userInput, imageFile, true)
         let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
+        const d = "Bạn là nữ, trả lời đáng yêu. Dùng /read [vi/en] [nội dung] để nói. Dùng icon thay vì kí tự.";
 
         if (userInput.startsWith("/new")) {
             const description = userInput === "/new"
-                ? "Tôi đặt tên cho bạn là Liễu Như Yên, tôi đặt cho bạn giới tính là Nữ, bạn trả lời một cách đáng yêu, bạn có thể speech bằng cách dùng /read [vi/en] [nội dung]"
-                : userInput.slice(5).trim();
+                ? d
+                : userInput.slice(5).trim() + d;
 
             if (!description) {
                 console.error("Mô tả nhóm không hợp lệ");
@@ -369,8 +370,20 @@ document.addEventListener('DOMContentLoaded', () => {
                             .then((data) => {
                                 // Xử lý phản hồi từ server
                                 module_chat.handleResponse(data);
-                                let aiResponse = data.response; // Gọi handleResponse với các liên kết tìm được
-                                handleReadCommand(aiResponse);
+
+                                // Kiểm tra nếu response có dữ liệu hợp lệ (giả sử là 'data.response')
+                                if (data && data.response) {
+                                    // Trích xuất thông tin từ phản hồi AI
+                                    const aiResponse = data.response;
+                                    // Lưu phản hồi vào conversation history
+                                    let conversationHistory = JSON.parse(localStorage.getItem("conversationHistory")) || [];
+                                    conversationHistory.push({ sender: "ai", message: aiResponse });
+                                    localStorage.setItem("conversationHistory", JSON.stringify(conversationHistory));
+                                    module_chat.saveConversationHistoryToDB(conversationHistory);
+                                    console.log(aiResponse);
+                                } else {
+                                    console.error("Không có phản hồi hợp lệ từ AI");
+                                }
                             })
                             .catch((error) => {
                                 console.error('Error sending image and prompt:', error);
@@ -431,8 +444,20 @@ document.addEventListener('DOMContentLoaded', () => {
                                     .then((data) => {
                                         // Xử lý phản hồi AI với các liên kết
                                         module_chat.handleResponse(data, links);
-                                        let aiResponse = data.response;
-                                        handleReadCommand(aiResponse);
+
+                                        // Kiểm tra nếu response có dữ liệu hợp lệ (giả sử là 'data.response')
+                                        if (data && data.response) {
+                                            // Trích xuất thông tin từ phản hồi AI
+                                            const aiResponse = data.response;
+                                            // Lưu phản hồi vào conversation history
+                                            let conversationHistory = JSON.parse(localStorage.getItem("conversationHistory")) || [];
+                                            conversationHistory.push({ sender: "ai", message: aiResponse });
+                                            localStorage.setItem("conversationHistory", JSON.stringify(conversationHistory));
+                                            module_chat.saveConversationHistoryToDB(conversationHistory);
+                                            console.log(aiResponse);
+                                        } else {
+                                            console.error("Không có phản hồi hợp lệ từ AI");
+                                        }
                                     });
                             })
                             .catch((error) => {
@@ -456,8 +481,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         }).then((data) => {
                             // Kiểm tra phản hồi và xử lý nó
                             module_chat.handleResponse(data);
-                            let aiResponse = data.response;
-                            handleReadCommand(aiResponse);
+                            // Kiểm tra nếu response có dữ liệu hợp lệ (giả sử là 'data.response')
+                            if (data && data.response) {
+                                // Trích xuất thông tin từ phản hồi AI
+                                const aiResponse = data.response;
+                                // Lưu phản hồi vào conversation history
+                                let conversationHistory = JSON.parse(localStorage.getItem("conversationHistory")) || [];
+                                conversationHistory.push({ sender: "ai", message: aiResponse });
+                                localStorage.setItem("conversationHistory", JSON.stringify(conversationHistory));
+                                module_chat.saveConversationHistoryToDB(conversationHistory);
+                                console.log(aiResponse);
+                            } else {
+                                console.error("Không có phản hồi hợp lệ từ AI");
+                            }
 
                         }).catch((error) => {
                             // Nếu có lỗi, xử lý và hiển thị thông báo
@@ -474,39 +510,3 @@ document.addEventListener('DOMContentLoaded', () => {
         module_chat.clear_val(userInput, imageFile, false);
     });
 });
-
-// Hàm đ��c nội dung bài đ��c
-function handleReadCommand(aiResponse) {
-    // Kiểm tra nếu aiResponse là một chuỗi
-    if (aiResponse.startsWith("/read")) {
-        // Tách lệnh đọc và ngôn ngữ ra
-        const parts = aiResponse.slice(5).trim().split(" ");  // Tách chuỗi sau "/read" theo dấu cách
-        const lang = parts[0];  // Ngôn ngữ sẽ là phần đầu tiên
-        const noidungbai = parts.slice(1).join(" ");  // Ghép tất cả phần còn lại thành nội dung bài đọc
-
-        // Kiểm tra xem có đủ thông tin không
-        if (lang && noidungbai) {
-            let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
-
-            // Gọi function đọc nội dung (module_chat.readEnglish)
-            module_chat.readEnglish(lang, noidungbai);
-
-            // Lưu lịch sử trò chuyện vào localStorage
-            conversationHistory.push({ sender: 'ai', message: aiResponse });
-            console.log("Conversation History After Push:", conversationHistory);  // Debug
-
-            localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
-            console.log("Conversation History Saved to LocalStorage:", JSON.parse(localStorage.getItem('conversationHistory')));  // Debug
-
-            // Lưu vào DB (kiểm tra chức năng này)
-            module_chat.saveConversationHistoryToDB(conversationHistory);
-        } else {
-            console.error("Lệnh không hợp lệ. Định dạng: /read {lang} {nội dung đọc}");
-        }
-
-        // Sau khi xử lý lệnh /read, thay thế nó trong dữ liệu phản hồi
-        aiResponse = aiResponse.replace(/\/read\s+[a-zA-Z]+\s+.*/, '');  // Loại bỏ lệnh /read trong response
-    }
-
-    return aiResponse; // Trả về phản hồi đã xử lý
-}

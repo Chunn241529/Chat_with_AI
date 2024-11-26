@@ -215,7 +215,7 @@ body::-webkit-scrollbar {
     padding: 0.5em 0.8em;
     line-height: 1.5;
     border-radius: 6px;
-    font-family: sans-serif;
+    font-family: 'Open Sans', sans-serif;
 }
 
 #chat .chat__conversation-board__message__bubble:not(:last-child) {
@@ -260,7 +260,7 @@ body::-webkit-scrollbar {
     flex-grow: 1;
     min-width: 50px;
     font-size: 16px;
-    font-family: sans-serif;
+    font-family: 'Open Sans', sans-serif;
     background: transparent;
     color: var(--chat-text-color);
     border: 0;
@@ -434,16 +434,12 @@ pre {
     color: #f8f8f2;
     font-size: 14px;
     white-space: pre-wrap;
-    /* Cho phép dòng dài bị bẻ xuống */
     word-wrap: break-word;
-    /* Đảm bảo không bị tràn */
     overflow-x: auto;
-    /* Cho phép cuộn ngang */
 }
 
-/* Thiết lập font chữ cho code */
 code {
-    font-family: Consolas, Monaco, monospace;
+    font-family: 'Open Sans', sans-serif;
 }
 
 .modal-full {
