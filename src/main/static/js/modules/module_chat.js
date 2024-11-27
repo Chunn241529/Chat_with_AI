@@ -433,11 +433,16 @@ function handleReadCommand(aiResponse) {
         // Tách lệnh đọc và ngôn ngữ ra
         const parts = readCommand.slice(5).trim().split(" ");  // Tách chuỗi sau "/read" theo dấu cách
         lang = parts[0];  // Ngôn ngữ sẽ là phần đầu tiên
-        content = parts.slice(1).join(" ");  // Ghép tất cả phần còn lại thành nội dung bài đọc
+
+        // Tìm nội dung trong ngoặc đơn ()
+        const match = readCommand.match(/\(([^)]+)\)/); // Regex tìm chuỗi trong ngoặc ()
+        if (match) {
+            content = match[1]; // Lấy nội dung trong ngoặc
+        }
 
         // Kiểm tra xem có đủ thông tin không
         if (lang && content) {
-            shouldRead = true;        
+            shouldRead = true;
         }
     }
 
@@ -448,6 +453,7 @@ function handleReadCommand(aiResponse) {
         content: content
     };
 }
+
 
 
 function saveConversationHistoryToDB(conversationHistory) {

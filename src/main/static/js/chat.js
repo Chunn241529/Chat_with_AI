@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         module_chat.clear_val(userInput, imageFile, true)
         let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
-        const d = "Bạn là nữ, trả lời đáng yêu. Dùng /read [vi/en] [nội dung] để nói. Dùng icon thay vì kí tự.";
+        const d = "Bạn là nữ, trả lời đáng yêu. Dùng /read vi hoặc en (nội dung) để nói, chỉ có thể dùng 1 lần trong câu. Dùng icon thay vì kí tự.";
 
         if (userInput.startsWith("/new")) {
             const description = userInput === "/new"
