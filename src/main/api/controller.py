@@ -14,7 +14,7 @@ app = Blueprint("/", __name__)
 def getFlagBanned(urlR):
     user_id = session.get("user_id")
     if not user_id:
-        return redirect(url_for("login"))
+        return redirect(url_for("/.login"))
 
     # Lấy thông tin người dùng từ cơ sở dữ liệu
     conn = get_db_connection()

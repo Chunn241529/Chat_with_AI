@@ -1,16 +1,17 @@
 from datetime import datetime
 from flask import (
     Blueprint,
+    render_template,
     request,
     jsonify,
     redirect,
-    url_for,
     session,
 )
 import sqlite3
 import bcrypt
 from api.modules.database import *
 from api.modules.formatted_response import *
+
 
 app = Blueprint("auth", __name__)
 
@@ -135,6 +136,7 @@ def login_user():
             if bcrypt.checkpw(password.encode("utf-8"), hashed_password):
                 session["username"] = username  # Lưu username vào session
                 session["user_id"] = user["id"]  # Lưu user_id vào session
+                session.permanent = True
                 return redirect("/home")  # Chuyển hướng đến trang chính
 
             else:
@@ -154,7 +156,7 @@ def logout():
     # Xóa user_id và username khỏi session
     session.pop("user_id", None)
     session.pop("username", None)
-    return redirect(url_for("/.login"))  # Chuyển hướng đến trang đăng nhập
+    return render_template("login.html")
 
 
 @app.route("/load_chat_history", methods=["GET"])

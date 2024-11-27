@@ -359,7 +359,39 @@ def generate_content_from_image():
         return jsonify({"error": str(e)}), 500
 
 
+import time
+from functools import wraps
+
+# Thêm biến toàn cục để theo dõi thời gian gọi API cuối cùng
+last_api_call_time = 0
+
+
+# Decorator để kiểm tra thời gian chờ
+def throttle(seconds):
+    def decorator(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            global last_api_call_time
+            current_time = time.time()
+            if current_time - last_api_call_time < seconds:
+                return (
+                    jsonify(
+                        {
+                            "response": f"Vui lòng đợi {seconds} giây trước khi gửi yêu cầu tiếp theo."
+                        }
+                    ),
+                    429,
+                )
+            last_api_call_time = current_time
+            return f(*args, **kwargs)
+
+        return wrapped
+
+    return decorator
+
+
 @app.route("/send", methods=["POST"])
+@throttle(20)  # Áp dụng decorator với thời gian chờ 10 giây
 def chat():
     global current_group_id
     data = request.get_json()
@@ -377,6 +409,26 @@ def chat():
     # Nếu đã chọn nhóm hoặc tạo nhóm mới, tiếp tục với tin nhắn người dùng
     ai_response = chat_with_ai(user_input)
     return jsonify({"response": ai_response})
+
+
+# @app.route("/send", methods=["POST"])
+# def chat():
+#     global current_group_id
+#     data = request.get_json()
+#     user_input = data.get("user_input")
+
+#     # Lấy user_id từ session
+#     user_id = session.get("user_id")
+#     if user_id is None:
+#         return jsonify({"error": "Người dùng chưa đăng nhập."}), 401
+
+#     # Nếu chưa chọn nhóm, tạo một nhóm mặc định với user_id
+#     if current_group_id is None:
+#         current_group_id = create_group(user_id, "bình thường", None)
+
+#     # Nếu đã chọn nhóm hoặc tạo nhóm mới, tiếp tục với tin nhắn người dùng
+#     ai_response = chat_with_ai(user_input)
+#     return jsonify({"response": ai_response})
 
 
 @app.route("/newchat", methods=["POST"])

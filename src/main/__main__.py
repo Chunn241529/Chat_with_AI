@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import Flask, redirect, url_for
 from flask_session import Session
 from api.api_chat import app as chat_app
@@ -22,6 +23,8 @@ print(secret_key)
 # Cấu hình Flask-Session
 main_app.config["SESSION_TYPE"] = "filesystem"
 main_app.secret_key = secret_key  # Thay thế bằng khóa bí mật thực tế của bạn
+main_app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
+
 Session(main_app)
 
 # Đăng ký các blueprint cho từng ứng dụng

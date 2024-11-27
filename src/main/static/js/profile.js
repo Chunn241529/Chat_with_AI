@@ -14,15 +14,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
             // Thực hiện cập nhật dữ liệu người dùng
             await module_users.updateUser(updatedUserData);
-
-            // Hiển thị spinner khi đang lưu dữ liệu
-            document.getElementById("loader").style.display = "block";
-
             // Giả lập quá trình lưu dữ liệu
             setTimeout(() => {
-                // Ẩn spinner sau khi hoàn thành
-                document.getElementById("loader").style.display = "none";
-
                 // Hiển thị thông báo thành công
                 const successMessage = document.getElementById("successMessage");
                 successMessage.style.display = "block";
@@ -78,7 +71,7 @@ function populateForm(userData) {
     document.getElementById("inputBirthday").value = userData.date_of_birth || "";
 
     // Set the profile picture (if available)
-    const profilePicture = userData.profile_picture || "";
+    const profilePicture = userData.profile_picture || "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjwhLS0gVXBsb2FkZWQgdG86IFNWRyBSZXBvLCB3d3cuc3ZncmVwby5jb20sIEdlbmVyYXRvcjogU1ZHIFJlcG8gTWl4ZXIgVG9vbHMgLS0+Cjxzdmcgd2lkdGg9IjgwMHB4IiBoZWlnaHQ9IjgwMHB4IiB2aWV3Qm94PSIwIDAgMTYgMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+DQogICAgPHBhdGggZD0ibSA4IDEgYyAtMS42NTYyNSAwIC0zIDEuMzQzNzUgLTMgMyBzIDEuMzQzNzUgMyAzIDMgcyAzIC0xLjM0Mzc1IDMgLTMgcyAtMS4zNDM3NSAtMyAtMyAtMyB6IG0gLTEuNSA3IGMgLTIuNDkyMTg4IDAgLTQuNSAyLjAwNzgxMiAtNC41IDQuNSB2IDAuNSBjIDAgMS4xMDkzNzUgMC44OTA2MjUgMiAyIDIgaCA4IGMgMS4xMDkzNzUgMCAyIC0wLjg5MDYyNSAyIC0yIHYgLTAuNSBjIDAgLTIuNDkyMTg4IC0yLjAwNzgxMiAtNC41IC00LjUgLTQuNSB6IG0gMCAwIiBmaWxsPSIjMmUzNDM2Ii8+DQo8L3N2Zz4=";
     document.getElementById("inputProfilePicture").src = profilePicture;
 }
 

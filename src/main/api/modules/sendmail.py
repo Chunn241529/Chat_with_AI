@@ -15,10 +15,7 @@ from email.mime.text import MIMEText
 
 # Tải biến môi trường từ file .env
 load_dotenv()
-genai.configure(api_key=os.getenv("GERMINI_API_KEY"))
 
-# Khởi tạo mô hình
-model = genai.GenerativeModel("gemini-1.5-pro")
 app = Blueprint("mail", __name__)
 
 
@@ -47,7 +44,6 @@ def sendMail(sender_mail, sender_pw, receiver_mail, subject, body_mail):
                 </a>
             </p>
             <p>Chúc bạn học tốt!</p>
-            <p>Trân trọng,<br/>Đội ngũ hỗ trợ học tiếng Anh</p>
         </div>
     </body>
     </html>

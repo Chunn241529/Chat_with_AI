@@ -5,8 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     module_users.getUser();  // Gọi hàm lấy thông tin user
     let isSending = false;  // Biến trạng thái đang gửi
 
-    // Mỗi 100ms sẽ cập nhật lại placeholder
-    setInterval(module_chat.animatePlaceholder, 100);
+
 
     $('#user_input').on('input', function () {
         this.style.height = 'auto'; // Đặt lại chiều cao để tính toán chính xác
@@ -149,21 +148,58 @@ document.addEventListener('DOMContentLoaded', () => {
         $('#exampleModal').modal('show');
     });
 
+    let placeholderInterval;
+
+    function startPlaceholderAnimation() {
+        placeholderInterval = setInterval(module_chat.animatePlaceholder, 60);
+    }
+
+    function stopPlaceholderAnimation() {
+        clearInterval(placeholderInterval);
+    }
+
+    // Khởi động animation khi trang được tải
+    startPlaceholderAnimation();
+
     $('#send').click(async function () {
         if (isSending) {
-            isSending = false;  // Cập nhật trạng thái không còn đang gửi
-            document.getElementById("send").classList.remove("sending");  // Cập nhật nút
-            document.getElementById("send-icon").src = "../static/img/send.png";  // Khôi phục icon ban đầu
+            isSending = false;
+            document.getElementById("send").classList.remove("sending");
+            document.getElementById("send-icon").src = "../static/img/send.png";
             return;
         }
 
-        // Đặt trạng thái gửi và thay đổi giao diện
         isSending = true;
         document.getElementById("send").classList.add("sending");
         document.getElementById("send-icon").src = "../static/img/square.png";
 
         const userInput = $('#user_input').val().trim();
-        const imageFile = $('#file_input')[0].files[0]; // Lấy file ảnh từ input
+        const imageFile = $('#file_input')[0].files[0];
+
+        $('#user_input').prop('disabled', true);
+        $('#send').prop('disabled', true);
+
+        // Dừng animation placeholder
+        stopPlaceholderAnimation();
+
+        let countdown = 20;
+        const countdownInterval = setInterval(() => {
+            $('#user_input').attr('placeholder', `${countdown}s`);
+            countdown--;
+
+            if (countdown < 0) {
+                clearInterval(countdownInterval);
+                $('#user_input').attr('placeholder', 'Nhập tin nhắn');
+                $('#user_input').prop('disabled', false);
+                $('#send').prop('disabled', false);
+                isSending = false;
+                document.getElementById("send").classList.remove("sending");
+                document.getElementById("send-icon").src = "../static/img/send.png";
+
+                // Khởi động lại animation placeholder
+                startPlaceholderAnimation();
+            }
+        }, 1000);
 
         // Kiểm tra từ cấm
         if (module_chat.check_tucam(userInput)) {
