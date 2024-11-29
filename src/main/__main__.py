@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import Flask, redirect, url_for
 from flask_session import Session
 from api.api_chat import app as chat_app
@@ -11,6 +12,26 @@ import threading
 import time
 import schedule
 import requests
+import shutil
+import os
+
+
+# Hàm xóa cache Python (__pycache__ và *.pyc)
+def clear_python_cache():
+    print("Đang xóa cache Python...")
+    for root, dirs, files in os.walk(".", topdown=False):
+        # Xóa thư mục __pycache__
+        for name in dirs:
+            if name == "__pycache__":
+                shutil.rmtree(os.path.join(root, name))
+                print(f"Đã xóa thư mục: {os.path.join(root, name)}")
+        # Xóa file .pyc
+        for name in files:
+            if name.endswith(".pyc"):
+                os.remove(os.path.join(root, name))
+                print(f"Đã xóa file: {os.path.join(root, name)}")
+    print("Hoàn tất xóa cache Python.")
+
 
 # Tạo một ứng dụng Flask chính
 main_app = Flask(__name__)
@@ -22,6 +43,8 @@ print(secret_key)
 # Cấu hình Flask-Session
 main_app.config["SESSION_TYPE"] = "filesystem"
 main_app.secret_key = secret_key  # Thay thế bằng khóa bí mật thực tế của bạn
+main_app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
+
 Session(main_app)
 
 # Đăng ký các blueprint cho từng ứng dụng
@@ -53,7 +76,7 @@ def schedule_cron_jobs():
     print("Đang thiết lập cronjob...")
     # Đảm bảo chỉ thiết lập một lần
     if len(schedule.jobs) == 0:  # Nếu chưa có job nào
-        schedule.every().day.at("19:05").do(run_sendmail_api)
+        schedule.every().day.at("09:00").do(run_sendmail_api)
     print(f"Các công việc đã được lập lịch: {schedule.jobs}")
 
     while True:
@@ -66,6 +89,9 @@ def schedule_cron_jobs():
 
 if __name__ == "__main__":
     try:
+        # Xóa cache Python trước khi chạy server
+        clear_python_cache()
+
         # Chạy cronjob trong luồng riêng
         cron_thread = threading.Thread(target=schedule_cron_jobs, daemon=True)
         cron_thread.start()

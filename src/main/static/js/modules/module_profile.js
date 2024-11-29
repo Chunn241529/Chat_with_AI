@@ -14,10 +14,7 @@ const getUser = async () => {
         }
 
         const user = await response.json();
-
-        // Lưu ảnh đại diện vào localStorage hoặc sessionStorage
-        localStorage.setItem("profile_picture", user.profile_picture); // Lưu base64 vào localStorage
-
+        localStorage.setItem("profile_picture", user.profile_picture);
         return user;
     } catch (error) {
         console.error("Error fetching user:", error);
@@ -29,7 +26,7 @@ const getUser = async () => {
 // Update user information
 const updateUser = async (userData) => {
     try {
-        const response = await fetch(`/auth/user`, { // No need for userId in URL
+        const response = await fetch(`/auth/user`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -41,7 +38,9 @@ const updateUser = async (userData) => {
             throw new Error("Failed to update user");
         }
 
-        return await response.json();
+        const user = await response.json();
+        localStorage.setItem("profile_picture", user.profile_picture);
+        return user;
     } catch (error) {
         console.error("Error updating user:", error);
         throw error;
