@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Dừng animation placeholder
         stopPlaceholderAnimation();
 
-        let countdown = 20;
+        let countdown = 10;
         const countdownInterval = setInterval(() => {
             $('#user_input').attr('placeholder', `${countdown}s`);
             countdown--;
@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         module_chat.clear_val(userInput, imageFile, true)
         let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
-        const d = "Bạn là nữ, trả lời đáng yêu. Dùng /read vi hoặc en (nội dung) để nói, chỉ có thể dùng 1 lần trong câu. Dùng icon thay vì kí tự.";
+        const d = "Bạn là nữ, trả lời đáng yêu. Bạn có thể dùng /read vi hoặc en (content) để nói, lưu ý chỉ được dùng 1 lần trong câu và content phải nằm trong ngoặc (). Dùng icon thay vì kí tự.";
 
         if (userInput.startsWith("/new")) {
             const description = userInput === "/new"
@@ -434,6 +434,41 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Đọc hình ảnh
                     reader.readAsDataURL(imageFile);
                 } else {
+                    // fetch("/chat/send", {
+                    //     method: "POST",
+                    //     headers: {
+                    //         "Content-Type": "application/json",
+                    //     },
+                    //     body: JSON.stringify({ user_input: userInput }),
+                    // }).then((response) => {
+                    //     if (!response.ok) {
+                    //         throw new Error("Yêu cầu gửi thất bại.");
+                    //     }
+                    //     return response.json();
+                    // }).then((data) => {
+                    //     // Kiểm tra phản hồi và xử lý nó
+                    //     module_chat.handleResponse(data);
+                    //     // Kiểm tra nếu response có dữ liệu hợp lệ (giả sử là 'data.response')
+                    //     if (data && data.response) {
+                    //         // Trích xuất thông tin từ phản hồi AI
+                    //         const aiResponse = data.response;
+                    //         // Lưu phản hồi vào conversation history
+                    //         let conversationHistory = JSON.parse(localStorage.getItem("conversationHistory")) || [];
+                    //         conversationHistory.push({ sender: "ai", message: aiResponse });
+                    //         localStorage.setItem("conversationHistory", JSON.stringify(conversationHistory));
+                    //         module_chat.saveConversationHistoryToDB(conversationHistory);
+                    //         console.log(aiResponse);
+                    //     } else {
+                    //         console.error("Không có phản hồi hợp lệ từ AI");
+                    //     }
+
+                    // }).catch((error) => {
+                    //     // Nếu có lỗi, xử lý và hiển thị thông báo
+                    //     console.error(error.message || "Có lỗi xảy ra.");
+                    //     module_chat.handleResponse({ response: error.message || "Error occurred." });
+                    // }).finally(() => {
+                    //     isSending = false;
+                    // });
                     // Kiểm tra nếu userInput chứa từ khóa
                     if (module_chat.containsKeyword(userInput)) {
                         const searchSettings = {
