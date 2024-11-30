@@ -3,10 +3,6 @@ import { module_users } from './modules/module_profile.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     module_users.getUser();  // Gọi hàm lấy thông tin user
-    let isSending = false;  // Biến trạng thái đang gửi
-
-
-
     $('#user_input').on('input', function () {
         this.style.height = 'auto'; // Đặt lại chiều cao để tính toán chính xác
         if (this.scrollHeight > this.clientHeight) {
@@ -162,20 +158,9 @@ document.addEventListener('DOMContentLoaded', () => {
     startPlaceholderAnimation();
 
     $('#send').click(async function () {
-        if (isSending) {
-            isSending = false;
-            document.getElementById("send").classList.remove("sending");
-            document.getElementById("send-icon").src = "../static/img/send.png";
-            return;
-        }
-
-        isSending = true;
-        document.getElementById("send").classList.add("sending");
-        document.getElementById("send-icon").src = "../static/img/square.png";
-
         const userInput = $('#user_input').val().trim();
         const imageFile = $('#file_input')[0].files[0];
-
+        module_chat.toggleSending(true);
         $('#user_input').prop('disabled', true);
         $('#send').prop('disabled', true);
 
@@ -192,10 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 $('#user_input').attr('placeholder', 'Nhập tin nhắn');
                 $('#user_input').prop('disabled', false);
                 $('#send').prop('disabled', false);
-                isSending = false;
-                document.getElementById("send").classList.remove("sending");
-                document.getElementById("send-icon").src = "../static/img/send.png";
-
                 // Khởi động lại animation placeholder
                 startPlaceholderAnimation();
             }
@@ -214,10 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
             module_chat.appendMessage(iframeContent, "ai");
             module_chat.clear_val(userInput, imageFile, true);
 
-            // Cập nhật trạng thái và giao diện nút gửi
-            isSending = false;
-            document.getElementById("send").classList.remove("sending");
-            document.getElementById("send-icon").src = "../static/img/send.png";
+            module_chat.toggleSending(false);
 
             // Kiểm tra và lưu số lần nhập từ cấm
             let bannedCount = localStorage.getItem("bannedCount");
@@ -277,9 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
             module_chat.appendMessage(formattedUserInput, "user");
 
             if (noidungbai) {
-                isSending = false;  // Cập nhật trạng thái không còn đang gửi
-                document.getElementById("send").classList.remove("sending");  // Cập nhật nút
-                document.getElementById("send-icon").src = "../static/img/send.png";  // Khôi phục icon ban đầu
+                module_chat.toggleSending(false);
                 module_chat.englishPattern(noidungbai);
                 module_chat.appendMessage(formattedAiInput, "ai");
                 conversationHistory.push({ sender: 'user', message: formattedUserInput });
@@ -306,9 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
             module_chat.appendMessage(formattedUserInput, "user");
 
             if (noidungbai) {
-                isSending = false;  // Cập nhật trạng thái không còn đang gửi
-                document.getElementById("send").classList.remove("sending");  // Cập nhật nút
-                document.getElementById("send-icon").src = "../static/img/send.png";  // Khôi phục icon ban đầu
+                module_chat.toggleSending(false);
                 module_chat.createTopic(noidungbai);
                 module_chat.appendMessage(formattedAiInput, "ai");
                 conversationHistory.push({ sender: 'user', message: formattedUserInput });
@@ -341,9 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 module_chat.appendMessage(formattedUserInput, "user");
                 module_chat.appendMessage(formattedAiInput, "ai");
 
-                isSending = false;
-                document.getElementById("send").classList.remove("sending");
-                document.getElementById("send-icon").src = "../static/img/send.png";
+                module_chat.toggleSending(false);
 
                 // Gọi API đọc tiếng Anh hoặc tiếng Việt
                 module_chat.readEnglish(lang, noidungbai);
