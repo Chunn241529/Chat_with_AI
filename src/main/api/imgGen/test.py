@@ -1,26 +1,30 @@
 import os
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from zipfile import ZipFile
-from flask import Flask, send_file, jsonify
+from flask import Blueprint, send_file, jsonify, session
 
-app = Flask(__name__)
+app = Blueprint("img", __name__)
 
 # Chuyển đổi đường dẫn sang tuyệt đối
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOADS_FOLDER = os.path.join(BASE_DIR)
 
 
-def download_images_and_zip(
-    page_url, user_id, base_folder=UPLOADS_FOLDER, zip_name="images.zip"
-):
-    # Đường dẫn thư mục lưu ảnh
-    output_folder = os.path.join(base_folder, "getImgs", f"user_{user_id}")
+def download_images_and_zip(page_url, user_id):
+    # Trích xuất tên miền từ URL để tạo tên thư mục
+    domain = urlparse(page_url).netloc.replace("www.", "")  # Xóa "www." nếu có
+    domain_name = domain.split(".")[0]  # Chỉ lấy phần tên miền chính (bỏ phần mở rộng)
+
+    output_folder = os.path.join(
+        UPLOADS_FOLDER, "getImgs", f"user_{user_id}", domain_name
+    )
     os.makedirs(output_folder, exist_ok=True)  # Đảm bảo thư mục tồn tại
 
     # Đường dẫn file ZIP
-    zip_path = os.path.join(output_folder, zip_name)
+    zip_folder = os.path.join(UPLOADS_FOLDER, "getImgs", f"user_{user_id}")
+    zip_path = os.path.join(zip_folder, f"{domain_name}.zip")
     print(f"Đường dẫn ZIP sẽ được lưu: {zip_path}")
 
     # Nếu file ZIP đã tồn tại, xóa nó để tránh lỗi
@@ -29,8 +33,12 @@ def download_images_and_zip(
 
     # Tải hình ảnh và lưu vào thư mục
     try:
-        response = requests.get(page_url, timeout=10)
-        response.raise_for_status()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
+
+        response = requests.get(page_url, headers=headers, timeout=10)
+        response.raise_for_status()  # Kiểm tra lỗi
     except Exception as e:
         raise Exception(f"Lỗi khi kết nối tới URL: {e}")
 
@@ -45,7 +53,7 @@ def download_images_and_zip(
 
     for idx, img_url in enumerate(image_links):
         try:
-            img_response = requests.get(img_url, timeout=10)
+            img_response = requests.get(img_url, headers=headers, timeout=10)
             img_response.raise_for_status()
             img_name = os.path.join(output_folder, f"image_{idx + 1}.jpg")
             with open(img_name, "wb") as img_file:
@@ -71,7 +79,7 @@ def api_download_images():
     try:
         data = request.json
         url = data.get("url")
-        user_id = data.get("userId")
+        user_id = session.get("user_id")
 
         if not url:
             return jsonify({"error": "Thiếu tham số URL"}), 400
@@ -97,7 +105,3 @@ def download_file(user_id, filename):
     if os.path.exists(file_path):
         return send_file(file_path, as_attachment=True)
     return jsonify({"error": "File không tồn tại"}), 404
-
-
-if __name__ == "__main__":
-    app.run(debug=True)

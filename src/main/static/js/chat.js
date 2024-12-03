@@ -337,8 +337,55 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 console.error("Lệnh không hợp lệ. Định dạng: /read {lang} {nội dung đọc}");
             }
-        }
-        else {
+        } else if (userInput.startsWith("/downloadimgs")) {
+            const url = userInput.slice(13).trim();  // Lấy URL từ sau "/downloadimgs "
+
+            if (!url) {
+                module_chat.appendMessage("Vui lòng cung cấp URL để tải ảnh.", "ai");
+                return;
+            }
+
+            const formattedUserInput = module_chat.formatAndEscapeMessage4User(userInput);
+            module_chat.appendMessage(formattedUserInput, "user");
+            // Lưu lịch sử trò chuyện vào localStorage
+            conversationHistory.push({ sender: 'user', message: formattedUserInput });
+            try {
+                // Gọi API để tải ảnh và nén thành ZIP
+                const response = await fetch('/download_images', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url }),  // Thêm userId nếu cần
+                });
+
+                if (!response.ok) throw new Error("Có lỗi xảy ra khi tải ảnh.");
+
+                const data = await response.json();
+                const downloadUrl = data.download_url;
+
+
+                // Tạo thẻ <a> chứa liên kết tải về
+                const formattedAiInput = `<a href="${downloadUrl}" target="_blank" style="color: #ce2479; text-decoration: none;">Tải ảnh về tại đây</a> 👈 (Khi load lại trang link này sẽ mất)`;
+                module_chat.appendMessage(formattedAiInput, "ai");
+
+
+                conversationHistory.push({ sender: 'ai', message: formattedAiInput });
+                console.log("Conversation History After Push:", conversationHistory);  // Debug
+                localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+                console.log("Conversation History Saved to LocalStorage:", JSON.parse(localStorage.getItem('conversationHistory')));  // Debug
+
+                // Lưu vào DB (kiểm tra chức năng này)
+                module_chat.saveConversationHistoryToDB(conversationHistory);
+
+            } catch (error) {
+                console.error("Lỗi khi tải ảnh:", error);
+                module_chat.appendMessage("Có lỗi khi tải ảnh. Vui lòng thử lại.", "ai");
+            }
+
+            module_chat.clear_val(userInput, imageFile, true);
+            module_chat.toggleSending(false);
+            module_chat.disableAfterSend(false);
+
+        } else {
             if (userInput || imageFile) {
                 const formattedUserInput = module_chat.formatAndEscapeMessage4User(userInput);
 
