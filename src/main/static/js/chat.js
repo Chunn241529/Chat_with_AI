@@ -3,10 +3,6 @@ import { module_users } from './modules/module_profile.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     module_users.getUser();  // Gọi hàm lấy thông tin user
-    let isSending = false;  // Biến trạng thái đang gửi
-
-
-
     $('#user_input').on('input', function () {
         this.style.height = 'auto'; // Đặt lại chiều cao để tính toán chính xác
         if (this.scrollHeight > this.clientHeight) {
@@ -36,10 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Hiển thị started_message
         const started_message = [
             "Nhập **/new** để tạo tin nhắn mới\n",
-            "Nhập **/new [vai trò AI]** để tạo tin nhắn mới với AI theo ý bạn\n",
-            "Nhập **/createtopic [topic]** để tạo chủ đề ghi bài mới\n",
-            "Nhập **/takenote Từ vựng: [từ vựng]:[ý nghĩa từ vựng]** để ghi bài mới\n",
-            "Nhập **/read ['vi' hoặc 'en'] [từ vựng hoặc đoạn văn]** để AI đọc cho bạn nghe"
+            "Nhập **/new [vai trò AI]** để tạo tin nhắn mới với AI theo ý bạn.\n",
+            // "Nhập **/createtopic [topic]** để tạo chủ đề ghi bài mới.\n",
+            // "Nhập **/takenote Từ vựng: [từ vựng]:[ý nghĩa từ vựng]** để ghi bài mới.\n",
+            // "Nhập **/read ['vi' hoặc 'en'] [từ vựng hoặc đoạn văn]** để AI đọc cho bạn nghe.",
+            "Nhập **/getimgs [url chứa image]** để tải ảnh hàng loạt."
         ];
         module_chat.appendMessage(module_chat.formatAndEscapeMessage(started_message), "ai");
     } else {
@@ -162,27 +159,21 @@ document.addEventListener('DOMContentLoaded', () => {
     startPlaceholderAnimation();
 
     $('#send').click(async function () {
-        if (isSending) {
-            isSending = false;
-            document.getElementById("send").classList.remove("sending");
-            document.getElementById("send-icon").src = "../static/img/send.png";
-            return;
-        }
-
-        isSending = true;
-        document.getElementById("send").classList.add("sending");
-        document.getElementById("send-icon").src = "../static/img/square.png";
-
         const userInput = $('#user_input').val().trim();
         const imageFile = $('#file_input')[0].files[0];
+        module_chat.toggleSending(true);
+        module_chat.disableAfterSend(true);
 
-        $('#user_input').prop('disabled', true);
-        $('#send').prop('disabled', true);
+        if (!userInput) {
+            module_chat.toggleSending(false);
+            module_chat.disableAfterSend(false);
+            return;
+        }
 
         // Dừng animation placeholder
         stopPlaceholderAnimation();
 
-        let countdown = 10;
+        let countdown = 5;
         const countdownInterval = setInterval(() => {
             $('#user_input').attr('placeholder', `${countdown}s`);
             countdown--;
@@ -190,13 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (countdown < 0) {
                 clearInterval(countdownInterval);
                 $('#user_input').attr('placeholder', 'Nhập tin nhắn');
-                $('#user_input').prop('disabled', false);
-                $('#send').prop('disabled', false);
-                isSending = false;
-                document.getElementById("send").classList.remove("sending");
-                document.getElementById("send-icon").src = "../static/img/send.png";
-
-                // Khởi động lại animation placeholder
+                module_chat.disableAfterSend(false);
                 startPlaceholderAnimation();
             }
         }, 1000);
@@ -214,10 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
             module_chat.appendMessage(iframeContent, "ai");
             module_chat.clear_val(userInput, imageFile, true);
 
-            // Cập nhật trạng thái và giao diện nút gửi
-            isSending = false;
-            document.getElementById("send").classList.remove("sending");
-            document.getElementById("send-icon").src = "../static/img/send.png";
+            module_chat.toggleSending(false);
 
             // Kiểm tra và lưu số lần nhập từ cấm
             let bannedCount = localStorage.getItem("bannedCount");
@@ -240,12 +222,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         module_chat.clear_val(userInput, imageFile, true)
         let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
-        const d = "Bạn là nữ, trả lời đáng yêu. Bạn có thể dùng /read vi hoặc en (content) để nói, lưu ý chỉ được dùng 1 lần trong câu và content phải nằm trong ngoặc (). Dùng icon thay vì kí tự.";
-
+        const a = "bắt đầu tin nhắn mới. Quên hết nội dung cũ đi nhé";
+        const b = "Bạn có thể dùng /read vi hoặc en (content) để nói, lưu ý chỉ được dùng 1 lần trong câu và content phải nằm trong ngoặc (), bạn nên sử dụng ở đầu câu.";
+        const c = a + ". " + b
         if (userInput.startsWith("/new")) {
             const description = userInput === "/new"
-                ? d
-                : userInput.slice(5).trim() + d;
+                ? c
+                : userInput.slice(5).trim() + c;
 
             if (!description) {
                 console.error("Mô tả nhóm không hợp lệ");
@@ -277,9 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
             module_chat.appendMessage(formattedUserInput, "user");
 
             if (noidungbai) {
-                isSending = false;  // Cập nhật trạng thái không còn đang gửi
-                document.getElementById("send").classList.remove("sending");  // Cập nhật nút
-                document.getElementById("send-icon").src = "../static/img/send.png";  // Khôi phục icon ban đầu
+                module_chat.toggleSending(false);
                 module_chat.englishPattern(noidungbai);
                 module_chat.appendMessage(formattedAiInput, "ai");
                 conversationHistory.push({ sender: 'user', message: formattedUserInput });
@@ -306,9 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
             module_chat.appendMessage(formattedUserInput, "user");
 
             if (noidungbai) {
-                isSending = false;  // Cập nhật trạng thái không còn đang gửi
-                document.getElementById("send").classList.remove("sending");  // Cập nhật nút
-                document.getElementById("send-icon").src = "../static/img/send.png";  // Khôi phục icon ban đầu
+                module_chat.toggleSending(false);
                 module_chat.createTopic(noidungbai);
                 module_chat.appendMessage(formattedAiInput, "ai");
                 conversationHistory.push({ sender: 'user', message: formattedUserInput });
@@ -341,9 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 module_chat.appendMessage(formattedUserInput, "user");
                 module_chat.appendMessage(formattedAiInput, "ai");
 
-                isSending = false;
-                document.getElementById("send").classList.remove("sending");
-                document.getElementById("send-icon").src = "../static/img/send.png";
+                module_chat.toggleSending(false);
 
                 // Gọi API đọc tiếng Anh hoặc tiếng Việt
                 module_chat.readEnglish(lang, noidungbai);
@@ -361,8 +338,55 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 console.error("Lệnh không hợp lệ. Định dạng: /read {lang} {nội dung đọc}");
             }
-        }
-        else {
+        } else if (userInput.startsWith("/getimgs")) {
+            const url = userInput.slice(13).trim();  // Lấy URL từ sau "/downloadimgs "
+
+            if (!url) {
+                module_chat.appendMessage("Vui lòng cung cấp URL để tải ảnh.", "ai");
+                return;
+            }
+
+            const formattedUserInput = module_chat.formatAndEscapeMessage4User(userInput);
+            module_chat.appendMessage(formattedUserInput, "user");
+            // Lưu lịch sử trò chuyện vào localStorage
+            conversationHistory.push({ sender: 'user', message: formattedUserInput });
+            try {
+                // Gọi API để tải ảnh và nén thành ZIP
+                const response = await fetch('/download_images', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url }),  // Thêm userId nếu cần
+                });
+
+                if (!response.ok) throw new Error("Có lỗi xảy ra khi tải ảnh.");
+
+                const data = await response.json();
+                const downloadUrl = data.download_url;
+
+
+                // Tạo thẻ <a> chứa liên kết tải về
+                const formattedAiInput = `<a href="${downloadUrl}" target="_blank" style="color: #ce2479; text-decoration: none;">Tải ảnh về tại đây</a> 👈 (Khi load lại trang link này sẽ mất)`;
+                module_chat.appendMessage(formattedAiInput, "ai");
+
+
+                conversationHistory.push({ sender: 'ai', message: formattedAiInput });
+                console.log("Conversation History After Push:", conversationHistory);  // Debug
+                localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+                console.log("Conversation History Saved to LocalStorage:", JSON.parse(localStorage.getItem('conversationHistory')));  // Debug
+
+                // Lưu vào DB (kiểm tra chức năng này)
+                module_chat.saveConversationHistoryToDB(conversationHistory);
+
+            } catch (error) {
+                console.error("Lỗi khi tải ảnh:", error);
+                module_chat.appendMessage("Có lỗi khi tải ảnh. Vui lòng thử lại.", "ai");
+            }
+
+            module_chat.clear_val(userInput, imageFile, true);
+            module_chat.toggleSending(false);
+            module_chat.disableAfterSend(false);
+
+        } else {
             if (userInput || imageFile) {
                 const formattedUserInput = module_chat.formatAndEscapeMessage4User(userInput);
 

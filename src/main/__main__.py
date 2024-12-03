@@ -6,6 +6,7 @@ from api.api_authentication import app as auth_app
 from api.controller import app as app
 from api.api_english import app as en_app
 from api.modules.sendmail import app as mail_app
+from api.imgGen.test import app as img_app
 
 import secrets
 import threading
@@ -53,6 +54,7 @@ main_app.register_blueprint(auth_app, url_prefix="/auth")
 main_app.register_blueprint(app, url_prefix="/")
 main_app.register_blueprint(en_app, url_prefix="/en")
 main_app.register_blueprint(mail_app, url_prefix="/mail")
+main_app.register_blueprint(img_app, url_prefix="/")
 
 
 @main_app.route("/")

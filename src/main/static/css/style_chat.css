@@ -55,7 +55,8 @@ body::-webkit-scrollbar {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
+    overflow-y: hidden;
+    overflow-x: hidden;
     padding: 1em 0;
 }
 
@@ -277,13 +278,50 @@ body::-webkit-scrollbar {
 
 /* Ẩn placeholder khi input được focus */
 #chat .chat__conversation-panel__input:focus::placeholder {
-    opacity: 0; /* Ẩn placeholder khi focus */
+    opacity: 0;
+    /* Ẩn placeholder khi focus */
 }
 
 /* Đảm bảo placeholder không bị ẩn khi không focus */
 #chat .chat__conversation-panel__input::placeholder {
-    opacity: 1; /* Đảm bảo placeholder hiển thị khi không focus */
+    opacity: 1;
+    /* Đảm bảo placeholder hiển thị khi không focus */
 }
+
+/* Sóng âm thay thế textarea */
+.chat__conversation-panel__input.wave-active {
+    background: linear-gradient(to bottom, #00f 50%, transparent 50%);
+    background-size: 100% 100px;
+    height: 47px;
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    pointer-events: none;
+    /* Không cho phép nhập khi sóng âm hiển thị */
+}
+
+.chat__conversation-panel__input.wave-active::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: repeating-linear-gradient(to right, rgba(0, 0, 255, 0.2) 0px, rgba(0, 0, 255, 0.5) 5px, rgba(0, 0, 255, 0.2) 10px);
+    animation: wave-animation 1.5s linear infinite;
+}
+
+@keyframes wave-animation {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
 
 #chat .chat__conversation-panel__button {
     background-color: #6b33c2;
@@ -333,12 +371,22 @@ body::-webkit-scrollbar {
     transform: scale(0.97);
 }
 
-#send-icon {
-    width: 20px !important;
-    height: 20px !important;
-    text-align: center;
+
+#chat .chat__conversation-panel .micButton {
+    background: transparent;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    transition: background 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
 }
 
+#micButton:active {
+    transform: scale(0.97);
+}
 
 .textarea-wrapper {
     flex-grow: 1;
@@ -574,4 +622,12 @@ img {
     top: 0;
     z-index: 10;
     border-bottom: 1px solid transparent;
+}
+
+.micButton {
+    transition: transform 0.2s ease-in-out;
+}
+
+.micButton.active {
+    transform: scale(1.2);
 }

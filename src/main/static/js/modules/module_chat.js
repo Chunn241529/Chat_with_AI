@@ -204,7 +204,7 @@ const keyword_cams = [
     "lũ cặn bã", "đánh chết mày", "đồ xấu", "mày là đồ khốn", "thằng khốn đốn", "mày mất dạy", "tổ sư mày",
     "thằng bẩn thỉu", "cái thứ hèn hạ", "bố mày", "đồ điên", "đồ khốn kiếp", "thằng quái đản", "đồ súc sinh",
     "lũ hèn hạ", "chết tiệt", "đổ vỡ", "đéo có giá trị", "lũ chó", "mày là đồ ngu xuẩn", "bọn mày đáng chết",
-    "đi chết đi", "thằng chó chết", "lũ vô dụng", "mày tởm quá", "thằng khốn điên", "dmm",
+    "đi chết đi", "thằng chó chết", "lũ vô dụng", "mày tởm quá", "thằng khốn điên", "dmm", "cc", "cl",
 
     // Tiếng Anh
     "fuck", "shit", "bitch", "asshole", "bastard", "motherfucker", "cunt", "dumbass", "idiot",
@@ -411,12 +411,12 @@ function handleResponse(data, links = []) {
     // Hiển thị tin nhắn đã được xử lý (gồm cả HTML và code block)
     const aiMessageBubble = appendMessage('', "ai");
     typeWriter(aiMessageBubble, finalMessage, 4);
-    $('#response').scrollTop($('#response')[0].scrollHeight);
 
     // Nếu có lệnh đọc, thực hiện sau khi hiển thị tin nhắn
     if (shouldRead) {
         module_chat.readEnglish(lang, content);
     }
+    $('#response').scrollTop($('#response')[0].scrollHeight);
 }
 
 function handleReadCommand(aiResponse) {
@@ -553,6 +553,46 @@ function appendMessage(message, sender) {
     return isAI ? $('.ai-message').last().find('span') : null;
 }
 
+function disableAfterSend(state = true) {
+    $('#user_input').prop('disabled', state);
+    $('#send').prop('disabled', state);
+}
+
+function toggleSending(state = null) {
+    const sendButton = document.getElementById("send");
+    const sendIcon = document.getElementById("send-icon");
+
+    if (!sendButton || !sendIcon) {
+        console.error("Element not found: 'send' or 'send-icon'");
+        return;
+    }
+
+    const isCurrentlySending = sendButton.classList.contains("sending");
+
+    // Xác định trạng thái mới dựa trên tham số hoặc trạng thái hiện tại
+    const newState = state !== null ? state : !isCurrentlySending;
+
+    if (newState) {
+        // Bật trạng thái gửi
+        sendButton.classList.add("sending");
+        sendIcon.innerHTML = `
+            <rect height="16" width="16" fill="white"/>
+        `;
+        sendIcon.setAttribute("viewBox", "0 0 16 16");
+        sendIcon.style.transform = "scale(2)";
+    } else {
+        // Tắt trạng thái gửi
+        sendButton.classList.remove("sending");
+        sendIcon.innerHTML = `
+            <g id="info" />
+            <g id="icons">
+                <path fill="white" d="M13 7.828V20h-2V7.828l-5.364 5.364-1.414-1.414L12 4l7.778 7.778-1.414 1.414L13 7.828z"/>
+            </g>
+        `;
+        sendIcon.setAttribute("viewBox", "0 0 24 24");
+        sendIcon.style.transform = "scale(3)";
+    }
+}
 function typeWriter(element, text, speed) {
     let typingIndicator = $('<span>.</span>'); // Luôn có ít nhất 1 dấu chấm
     element.append(typingIndicator);
@@ -567,8 +607,7 @@ function typeWriter(element, text, speed) {
         clearInterval(typingInterval);
         typingIndicator.remove();
         element.html(text.replace(/\n/g, '<br>'));
-        document.getElementById("send").classList.remove("sending");
-        document.getElementById("send-icon").src = "../static/img/send.png";
+        toggleSending(false);
     }, text.length * speed);
 }
 
@@ -629,4 +668,6 @@ export const module_chat = {
     englishPattern,
     createTopic,
     readEnglish,
+    toggleSending,
+    disableAfterSend,
 };

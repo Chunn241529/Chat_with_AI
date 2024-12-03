@@ -54,6 +54,7 @@ IF NOT EXIST requirements.txt (
         echo schedule
         echo markdown
         echo pygments
+        echo beautifulsoup4
     ) > requirements.txt
 ) ELSE (
     echo requirements.txt already exists.
