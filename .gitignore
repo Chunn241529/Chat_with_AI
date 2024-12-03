@@ -8,3 +8,4 @@ src/main/.env
 /src/main/api/__pycache__
 /src/main/static/uploads
 /src/main/api/imgGen/getImgs
+/src/main/env
