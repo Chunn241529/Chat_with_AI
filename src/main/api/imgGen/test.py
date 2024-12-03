@@ -9,18 +9,18 @@ app = Flask(__name__)
 
 # Chuyển đổi đường dẫn sang tuyệt đối
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-UPLOADS_FOLDER = os.path.join(BASE_DIR, "uploads")
+UPLOADS_FOLDER = os.path.join(BASE_DIR)
 
 
 def download_images_and_zip(
-    page_url, base_folder=UPLOADS_FOLDER, zip_name="images.zip"
+    page_url, user_id, base_folder=UPLOADS_FOLDER, zip_name="images.zip"
 ):
     # Đường dẫn thư mục lưu ảnh
-    output_folder = os.path.join(base_folder, "downloaded_images")
+    output_folder = os.path.join(base_folder, "getImgs", f"user_{user_id}")
     os.makedirs(output_folder, exist_ok=True)  # Đảm bảo thư mục tồn tại
 
     # Đường dẫn file ZIP
-    zip_path = os.path.join(base_folder, zip_name)
+    zip_path = os.path.join(output_folder, zip_name)
     print(f"Đường dẫn ZIP sẽ được lưu: {zip_path}")
 
     # Nếu file ZIP đã tồn tại, xóa nó để tránh lỗi
@@ -70,19 +70,20 @@ def api_download_images():
     try:
         data = request.json
         url = data.get("url")
+        user_id = data.get("userId")
         if not url:
             return jsonify({"error": "Thiếu tham số URL"}), 400
 
-        zip_path = download_images_and_zip(url)
+        zip_path = download_images_and_zip(url, user_id)
         return jsonify({"download_url": f"/download/{os.path.basename(zip_path)}"})
     except Exception as e:
         print(f"Lỗi khi xử lý yêu cầu: {e}")
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/download/<filename>", methods=["GET"])
-def download_file(filename):
-    file_path = os.path.join(UPLOADS_FOLDER, filename)
+@app.route("/download/<user_id>/<filename>", methods=["GET"])
+def download_file(user_id, filename):
+    file_path = os.path.join(UPLOADS_FOLDER, "getImgs", f"user_{user_id}", filename)
     print(f"Đang tìm file: {file_path}")  # Log kiểm tra
     if os.path.exists(file_path):
         return send_file(file_path, as_attachment=True)
