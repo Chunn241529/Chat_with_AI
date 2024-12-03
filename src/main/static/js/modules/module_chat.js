@@ -204,7 +204,7 @@ const keyword_cams = [
     "lũ cặn bã", "đánh chết mày", "đồ xấu", "mày là đồ khốn", "thằng khốn đốn", "mày mất dạy", "tổ sư mày",
     "thằng bẩn thỉu", "cái thứ hèn hạ", "bố mày", "đồ điên", "đồ khốn kiếp", "thằng quái đản", "đồ súc sinh",
     "lũ hèn hạ", "chết tiệt", "đổ vỡ", "đéo có giá trị", "lũ chó", "mày là đồ ngu xuẩn", "bọn mày đáng chết",
-    "đi chết đi", "thằng chó chết", "lũ vô dụng", "mày tởm quá", "thằng khốn điên", "dmm",
+    "đi chết đi", "thằng chó chết", "lũ vô dụng", "mày tởm quá", "thằng khốn điên", "dmm", "cc", "cl",
 
     // Tiếng Anh
     "fuck", "shit", "bitch", "asshole", "bastard", "motherfucker", "cunt", "dumbass", "idiot",
@@ -416,6 +416,7 @@ function handleResponse(data, links = []) {
     if (shouldRead) {
         module_chat.readEnglish(lang, content);
     }
+    $('#response').scrollTop($('#response')[0].scrollHeight);
 }
 
 function handleReadCommand(aiResponse) {
@@ -552,6 +553,11 @@ function appendMessage(message, sender) {
     return isAI ? $('.ai-message').last().find('span') : null;
 }
 
+function disableAfterSend(state = true) {
+    $('#user_input').prop('disabled', state);
+    $('#send').prop('disabled', state);
+}
+
 function toggleSending(state = null) {
     const sendButton = document.getElementById("send");
     const sendIcon = document.getElementById("send-icon");
@@ -663,4 +669,5 @@ export const module_chat = {
     createTopic,
     readEnglish,
     toggleSending,
+    disableAfterSend,
 };

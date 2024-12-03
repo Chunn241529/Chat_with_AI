@@ -114,7 +114,7 @@ def chat_with_ai(user_input):
 
     # Nếu không tìm thấy vai trò, sử dụng mô tả mặc định
     if not role_description:
-        role_descriptions = "Bạn là nữ, trả lời đáng yêu. Bạn có thể dùng /read vi hoặc en (content) để nói, lưu ý chỉ được dùng 1 lần trong câu và content phải nằm trong ngoặc (). Dùng icon thay vì kí tự."
+        role_descriptions = "Bạn có thể dùng /read vi hoặc en (content) để nói, lưu ý chỉ được dùng 1 lần trong câu và content phải nằm trong ngoặc (), bạn nên sử dụng ở đầu câu."
     else:
         role_descriptions = f"{role_description['description']}"
 
@@ -381,7 +381,7 @@ def throttle(seconds):
 
 
 @app.route("/send", methods=["POST"])
-@throttle(10)  # Áp dụng decorator với thời gian chờ 10 giây
+@throttle(5)  # Áp dụng decorator với thời gian chờ 10 giây
 def chat():
     global current_group_id
     data = request.get_json()

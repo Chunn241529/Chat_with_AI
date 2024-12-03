@@ -1,8 +1,9 @@
+
+
 const micButton = document.getElementById('micButton');
 const userInput = document.getElementById('user_input');
 const sendButton = document.getElementById('send');
 const fileButton = document.getElementById('add_file_button');
-const microButton = document.getElementById('micButton')
 const panelContainer = document.getElementById('panel_container');
 
 let isListening = false;
@@ -16,15 +17,11 @@ micButton.addEventListener('click', () => {
     }
 });
 
-function startListening() {
-    micButton.classList.add('active');
-    micButton.innerHTML = `
+const micButtonSvg_white = `
         <svg
             data-name="Layer 1"
-            height="200"
             id="Layer_1"
             viewBox="0 0 200 200"
-            width="200"
             xmlns="http://www.w3.org/2000/svg"
             style="transform: scale(3)"
         >
@@ -42,68 +39,13 @@ function startListening() {
                 d="M168.52,126c-5-2-11,0-13,5a57,57,0,0,1-52,34H96a57,57,0,0,1-52-34,9.52,9.52,0,0,0-13-5,9.52,9.52,0,0,0-5,13c12,28,40,46,70.5,46H104a77.2,77.2,0,0,0,70.5-46C176,134,173.52,128,168.52,126Z"
             />
         </svg>
-    `;  // Thay đổi thành icon stop
-    isListening = true;
+    `;
 
-    // Ẩn phần tử user_input khi bắt đầu nhận diện giọng nói
-    userInput.style.display = 'none';
-    sendButton.style.display = 'none';
-
-
-    panelContainer.style.background = 'var(--chat-panel-background)';
-    panelContainer.style.borderRadius = '40px';
-    panelContainer.style.padding = '0';
-    panelContainer.style.height = '80px';
-    panelContainer.style.margin = '0.5em auto';
-    panelContainer.style.width = 'auto';
-    panelContainer.style.display = 'flex';
-    panelContainer.style.alignItems = 'center';
-    panelContainer.style.transition = 'width 0.3s ease';
-
-    microButton.style.background = 'var(--chat-send-button-background)';
-
-    // Chuyển sang chế độ nhận diện giọng nói
-    userInput.placeholder = ''; // Xóa placeholder
-
-    // Khởi động nhận diện giọng nói
-    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'vi-VN';
-    recognition.continuous = true;
-
-    recognition.onresult = (event) => {
-        const transcript = Array.from(event.results)
-            .map((result) => result[0].transcript)
-            .join('');
-
-        // Cập nhật nội dung vào textarea
-        userInput.value = transcript;
-    };
-
-    recognition.onerror = (event) => {
-        if (event.error === 'no-speech') {
-            console.error('Không nhận được giọng nói.');
-            alert('Không nhận được giọng nói. Hãy thử lại.');
-        } else if (event.error === 'not-allowed') {
-            console.error('Quyền truy cập micro bị từ chối.');
-            alert('Bạn cần cho phép quyền truy cập micro.');
-        } else {
-            console.error('Lỗi:', event.error);
-        }
-        stopListening();
-    };
-
-    recognition.start();
-}
-
-function stopListening() {
-    micButton.classList.remove('active');
-    micButton.innerHTML = `
+const micButtonSvg_black = `
         <svg
             data-name="Layer 1"
-            height="200"
             id="Layer_1"
             viewBox="0 0 200 200"
-            width="200"
             xmlns="http://www.w3.org/2000/svg"
             style="transform: scale(3)"
         >
@@ -119,6 +61,102 @@ function stopListening() {
             />
         </svg>
     `;
+
+function micButtonAnimation(state = true) {
+    if (state) {
+        micButton.innerHTML = micButtonSvg_white;
+        micButton.style.background = 'var(--chat-send-button-background)'
+        micButton.style.transform = 'scale(1.2)';
+    } else {
+        micButton.innerHTML = micButtonSvg_black;
+        micButton.style.transform = 'scale(1)';
+        micButton.style.background = 'transparent'
+    }
+}
+
+function startListening() {
+    micButton.innerHTML = micButtonSvg_black;
+
+    isListening = true;
+    userInput.style.display = 'none';
+    sendButton.style.display = 'none';
+    panelContainer.style.width = 'auto';
+
+    micButton.style.background = 'transparent';
+
+    userInput.placeholder = ''; // Xóa placeholder
+
+    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'vi-VN'; // Bắt đầu với tiếng Việt
+    recognition.continuous = true;
+
+    let timeout;
+
+    const resetTimeout = () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            console.warn('Không có giọng nói trong 3 giây.');
+
+            // Kiểm tra nếu có nội dung trong userInput
+            const userInputContent = userInput.value.trim();
+            if (userInputContent) {
+                console.log('Tự động gửi nội dung sau khi không có giọng nói.');
+                $('#send').click(); // Gửi nội dung tự động
+                userInput.value = ''; // Xóa nội dung trong input
+                stopListening();
+            }
+
+            micButtonAnimation(false); // Thu nhỏ nút microphone
+        }, 3000);
+    };
+
+    const triggerEffect = () => {
+        // Phóng to nút microphone khi có giọng nói
+        micButtonAnimation(true);
+    };
+
+    recognition.onspeechstart = () => {
+        // Phóng to nút microphone ngay khi nhận diện giọng nói bắt đầu
+        triggerEffect();
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = Array.from(event.results)
+            .map((result) => result[0].transcript)
+            .join('');
+
+        userInput.value = transcript;
+        resetTimeout(); // Reset lại thời gian nếu có giọng nói
+        triggerEffect();
+    };
+
+    recognition.onspeechend = () => {
+        // Thu nhỏ nút microphone khi kết thúc giọng nói
+        micButtonAnimation(false);
+        console.log('Speech ended');
+    };
+
+    recognition.onerror = (event) => {
+        if (event.error === 'no-speech') {
+            console.error('Không nhận được giọng nói.');
+        } else {
+            console.error('Lỗi:', event.error);
+        }
+    };
+
+    recognition.onend = () => {
+        resetTimeout();
+        recognition.start(); // Tiếp tục nhận diện giọng nói
+    };
+
+    recognition.start();
+}
+
+
+function stopListening() {
+    micButtonAnimation(false);
+    micButton.classList.remove('active');
+    micButton.innerHTML = micButtonSvg_black
     isListening = false;
 
     if (recognition) {
@@ -131,10 +169,6 @@ function stopListening() {
     sendButton.style.display = 'flex';
     fileButton.style.display = 'flex';
 
-    // Đảm bảo phần tử #panel_container có thể nhận được focus và kích hoạt lại :focus-within
-
-
-    // Thêm thuộc tính tabindex để đảm bảo phần tử có thể nhận focus
     panelContainer.setAttribute('tabindex', '0');
 
     // Đè lại toàn bộ CSS vào phần tử
@@ -148,13 +182,5 @@ function stopListening() {
     panelContainer.style.alignItems = 'center';
     panelContainer.style.transition = 'width 0.3s ease';
 
-    microButton.style.background = 'transparent'
-
-    // Đảm bảo phần tử nhận focus và kích hoạt lại :focus-within
-    panelContainer.focus(); // Kích hoạt focus sau khi dừng micro
-
-    // Chuyển lại chế độ nhập văn bản
-    userInput.placeholder = 'Nhập tin nhắn...';
+    micButton.style.background = 'transparent'
 }
-
-

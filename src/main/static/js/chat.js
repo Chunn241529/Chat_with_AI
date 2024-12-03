@@ -161,13 +161,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const userInput = $('#user_input').val().trim();
         const imageFile = $('#file_input')[0].files[0];
         module_chat.toggleSending(true);
-        $('#user_input').prop('disabled', true);
-        $('#send').prop('disabled', true);
+        module_chat.disableAfterSend(true);
+
+        if (!userInput) {
+            module_chat.toggleSending(false);
+            module_chat.disableAfterSend(false);
+            return;
+        }
 
         // Dừng animation placeholder
         stopPlaceholderAnimation();
 
-        let countdown = 10;
+        let countdown = 5;
         const countdownInterval = setInterval(() => {
             $('#user_input').attr('placeholder', `${countdown}s`);
             countdown--;
@@ -175,9 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (countdown < 0) {
                 clearInterval(countdownInterval);
                 $('#user_input').attr('placeholder', 'Nhập tin nhắn');
-                $('#user_input').prop('disabled', false);
-                $('#send').prop('disabled', false);
-                // Khởi động lại animation placeholder
+                module_chat.disableAfterSend(false);
                 startPlaceholderAnimation();
             }
         }, 1000);
@@ -218,12 +221,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         module_chat.clear_val(userInput, imageFile, true)
         let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory')) || [];
-        const d = "Bạn là nữ, trả lời đáng yêu. Bạn có thể dùng /read vi hoặc en (content) để nói, lưu ý chỉ được dùng 1 lần trong câu và content phải nằm trong ngoặc (). Dùng icon thay vì kí tự.";
-
+        const a = "bắt đầu tin nhắn mới. Quên hết nội dung cũ đi nhé";
+        const b = "Bạn có thể dùng /read vi hoặc en (content) để nói, lưu ý chỉ được dùng 1 lần trong câu và content phải nằm trong ngoặc (), bạn nên sử dụng ở đầu câu.";
+        const c = a + ". " + b
         if (userInput.startsWith("/new")) {
             const description = userInput === "/new"
-                ? d
-                : userInput.slice(5).trim() + d;
+                ? c
+                : userInput.slice(5).trim() + c;
 
             if (!description) {
                 console.error("Mô tả nhóm không hợp lệ");

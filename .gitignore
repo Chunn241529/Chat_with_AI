@@ -7,3 +7,4 @@ src/main/.env
 /src/main/api/modules/__pycache__
 /src/main/api/__pycache__
 /src/main/static/uploads
+/src/main/imgGenerate/uploads
