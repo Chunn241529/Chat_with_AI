@@ -63,19 +63,28 @@ def download_images_and_zip(
     return zip_path
 
 
+from flask import request, jsonify
+
+
 @app.route("/download_images", methods=["POST"])
 def api_download_images():
-    from flask import request
-
     try:
         data = request.json
         url = data.get("url")
         user_id = data.get("userId")
+
         if not url:
             return jsonify({"error": "Thiếu tham số URL"}), 400
 
         zip_path = download_images_and_zip(url, user_id)
-        return jsonify({"download_url": f"/download/{os.path.basename(zip_path)}"})
+
+        # Sử dụng request.url_root để lấy URL gốc của ứng dụng
+        download_url = (
+            request.url_root + f"download/{user_id}/{os.path.basename(zip_path)}"
+        )
+
+        return jsonify({"download_url": download_url})
+
     except Exception as e:
         print(f"Lỗi khi xử lý yêu cầu: {e}")
         return jsonify({"error": str(e)}), 500
