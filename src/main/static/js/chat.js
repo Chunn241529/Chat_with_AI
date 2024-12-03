@@ -33,9 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const started_message = [
             "Nhập **/new** để tạo tin nhắn mới\n",
             "Nhập **/new [vai trò AI]** để tạo tin nhắn mới với AI theo ý bạn.\n",
-            "Nhập **/createtopic [topic]** để tạo chủ đề ghi bài mới.\n",
-            "Nhập **/takenote Từ vựng: [từ vựng]:[ý nghĩa từ vựng]** để ghi bài mới.\n",
-            "Nhập **/read ['vi' hoặc 'en'] [từ vựng hoặc đoạn văn]** để AI đọc cho bạn nghe.",
+            // "Nhập **/createtopic [topic]** để tạo chủ đề ghi bài mới.\n",
+            // "Nhập **/takenote Từ vựng: [từ vựng]:[ý nghĩa từ vựng]** để ghi bài mới.\n",
+            // "Nhập **/read ['vi' hoặc 'en'] [từ vựng hoặc đoạn văn]** để AI đọc cho bạn nghe.",
             "Nhập **/getimgs [url chứa image]** để tải ảnh hàng loạt."
         ];
         module_chat.appendMessage(module_chat.formatAndEscapeMessage(started_message), "ai");
