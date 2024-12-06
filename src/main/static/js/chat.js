@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Lệnh không hợp lệ. Định dạng: /read {lang} {nội dung đọc}");
             }
         } else if (userInput.startsWith("/getimgs")) {
-            const url = userInput.slice(13).trim();  // Lấy URL từ sau "/downloadimgs "
+            const url = userInput.slice(8).trim();  // Lấy URL từ sau "/downloadimgs "
 
             if (!url) {
                 module_chat.appendMessage("Vui lòng cung cấp URL để tải ảnh.", "ai");
