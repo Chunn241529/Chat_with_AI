@@ -6,7 +6,7 @@ from api.api_authentication import app as auth_app
 from api.controller import app as app
 from api.api_english import app as en_app
 from api.modules.sendmail import app as mail_app
-from api.imgGen.test import app as img_app
+from api.imgGen.getimg import app as img_app
 
 import secrets
 import threading
