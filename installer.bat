@@ -1,4 +1,18 @@
 @echo off
+
+REM Kiểm tra và tạo file .env nếu chưa tồn tại
+IF NOT EXIST .env (
+    echo Tạo file .env với các thông số mẫu...
+    (
+        echo GERMINI_API_KEY=
+        echo GOOGLE_SEARCH_API=
+        echo SENDER_EMAIL=
+        echo SENDER_PASSWORD=
+    ) > .env
+) ELSE (
+    echo File .env đã tồn tại.
+)
+
 REM Kiểm tra xem môi trường ảo đã tồn tại chưa
 IF EXIST .venv (
     echo Đang xóa môi trường virtual environment hiện tại...
