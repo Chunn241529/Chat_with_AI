@@ -249,6 +249,20 @@ body::-webkit-scrollbar {
     width: 30%;
 }
 
+/* Mặc định button send sẽ không hiển thị */
+#chat .chat__conversation-panel #send {
+    display: none;
+}
+
+/* Khi chat__conversation-panel focus-within, hiển thị button send */
+#chat .chat__conversation-panel:focus-within #send {
+    display: flex;
+}
+
+#chat .chat__conversation-panel:focus-within #micButton {
+    display: none;
+}
+
 #chat .chat__conversation-panel__container {
     display: flex;
     align-items: flex-end;

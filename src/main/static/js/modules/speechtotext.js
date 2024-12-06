@@ -5,6 +5,7 @@ const userInput = document.getElementById('user_input');
 const sendButton = document.getElementById('send');
 const fileButton = document.getElementById('add_file_button');
 const panelContainer = document.getElementById('panel_container');
+const stopButton = document.getElementById('stop_speech');
 
 let isListening = false;
 let recognition;
@@ -80,6 +81,8 @@ function startListening() {
     isListening = true;
     userInput.style.display = 'none';
     sendButton.style.display = 'none';
+    fileButton.style.display = 'none';
+    stopButton.style.display = 'flex'
     panelContainer.style.width = 'auto';
 
     micButton.style.background = 'transparent';
@@ -102,22 +105,22 @@ function startListening() {
             if (userInputContent) {
                 console.log('Tự động gửi nội dung sau khi không có giọng nói.');
                 $('#send').click(); // Gửi nội dung tự động
-                userInput.value = ''; // Xóa nội dung trong input
-                stopListening();
+                recognition.stop();
             }
 
             micButtonAnimation(false); // Thu nhỏ nút microphone
         }, 3000);
     };
 
-    const triggerEffect = () => {
+    const start = () => {
         // Phóng to nút microphone khi có giọng nói
         micButtonAnimation(true);
+        recognition.start();
     };
 
     recognition.onspeechstart = () => {
         // Phóng to nút microphone ngay khi nhận diện giọng nói bắt đầu
-        triggerEffect();
+        start();
     };
 
     recognition.onresult = (event) => {
@@ -146,10 +149,11 @@ function startListening() {
 
     recognition.onend = () => {
         resetTimeout();
+        userInput.value = ''; // Xóa nội dung trong input
         recognition.start(); // Tiếp tục nhận diện giọng nói
     };
 
-    recognition.start();
+    start();
 }
 
 
@@ -168,6 +172,8 @@ function stopListening() {
     userInput.style.display = 'flex';
     sendButton.style.display = 'flex';
     fileButton.style.display = 'flex';
+    stopButton.style.display = 'none'
+    micButton.style.display = 'none'
 
     panelContainer.setAttribute('tabindex', '0');
 
@@ -183,4 +189,14 @@ function stopListening() {
     panelContainer.style.transition = 'width 0.3s ease';
 
     micButton.style.background = 'transparent'
+    reloadPage();
 }
+
+function reloadPage() {
+    location.reload();
+}
+
+
+$('#stop_speech').click(async function () {
+    stopListening();
+});
